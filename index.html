@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ar" class="dark" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بوابة المشرف الموقعي - SANA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        sana: {
+                            DEFAULT: '#3A6B68',
+                            hover: '#2E5553',
+                            light: '#4B8581',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            text-align: right;
+            touch-action: pan-x pan-y;
+            -webkit-text-size-adjust: 100%;
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+        }
+        @media (min-width: 640px) { body { padding: 20px; } }
+        .ios-card {
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px -15px rgba(58, 107, 104, 0.25);
+            width: 100%;
+            max-width: 100%;
+        }
+        .ios-input {
+            border-radius: 14px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: right;
+            width: 100%;
+        }
+        .ios-input:focus {
+            box-shadow: 0 0 0 3px rgba(58, 107, 104, 0.3);
+            border-color: #3A6B68;
+        }
+        .ios-button {
+            border-radius: 16px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ios-button:active { transform: scale(0.97); }
+        .ticket-card { transition: all 0.3s ease; cursor: pointer; width: 100%; }
+        .ticket-card:hover { transform: translateY(-2px); }
+        .logo-glow-container {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            width: 100%;
+        }
+        .dark .logo-glow-container { background: rgba(15, 23, 42, 0.35); }
+        input, select, textarea, button { font-size: 16px !important; }
+        @media (min-width: 640px) { input, select, textarea, button { font-size: 14px !important; } }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-right" dir="rtl">
+
+    <div id="sidebarOverlay" onclick="closeSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+    
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between text-right">
+        <div class="space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
+                <img src="Logo.png" alt="SANA Logo" class="h-8 object-contain">
+                <button onclick="closeSidebar()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl font-bold">✕</button>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="navigateTo('home')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition text-[#3A6B68] dark:text-[#4B8581]">
+                    <span>🏠</span> <span data-i18n="navHome">الصفحة الرئيسية</span>
+                </button>
+                <button onclick="navigateTo('profile')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-300">
+                    <span>👤</span> <span data-i18n="navProfile">حسابي</span>
+                </button>
+                <button onclick="navigateTo('notifications')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-300">
+                    <span>🔔</span> <span data-i18n="navNotifications">الإشعارات</span>
+                </button>
+            </nav>
+        </div>
+        <button onclick="openLogoutModal()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold text-sm rounded-xl border border-rose-500/20 transition">
+            <span>🚪</span> <span data-i18n="btnLogout">تسجيل الخروج</span>
+        </button>
+    </aside>
+
+    <header id="mainHeader" class="w-full max-w-xl flex justify-between items-center bg-white/80 dark:bg-slate-900/80 p-3.5 px-5 ios-card border border-slate-200/80 dark:border-slate-800 shadow-sm hidden mb-3">
+        <div class="flex items-center gap-2">
+            <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                <span class="themeIcon">☀️</span>
+                <span class="themeText">الشمس</span>
+            </button>
+            <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                <span>🌐</span>
+                <span class="langText">English</span>
+            </button>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="relative">
+                <button onclick="openNotificationsPopup()" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                </button>
+                <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-white dark:border-slate-900 hidden">0</span>
+            </div>
+            <button onclick="openSidebar()" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div id="mainLogoBanner" class="w-full max-w-xl hidden mb-4">
+        <div class="logo-glow-container w-full p-4 flex items-center justify-center border border-slate-200/50 dark:border-slate-800/50 shadow-sm">
+            <img src="Logo.png" alt="SANA Logo" class="w-full max-w-xs h-16 object-contain filter drop-shadow">
+        </div>
+    </div>
+
+    <!-- نافذة الإشعارات المنبثقة -->
+    <div id="notificationsPopup" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-[#0e1626] text-white p-5 rounded-3xl max-w-lg w-full border border-slate-800 space-y-4 max-h-[88vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <button onclick="closeNotificationsPopup()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+                <h3 class="text-lg font-black text-white flex items-center gap-2">
+                    <span data-i18n="popupNotifTitle">الإشعارات والتنبيهات</span>
+                    <span>🔔</span>
+                </h3>
+            </div>
+            <div id="markAllContainer" class="flex justify-between items-center bg-[#15233b] p-3 rounded-2xl border border-slate-700/60">
+                <span class="text-xs text-slate-300 font-bold">تحديد جميع الإشعارات المتبقية كمقروءة؟</span>
+                <button onclick="markAllNotificationsAsRead()" class="bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-black px-3.5 py-1.5 rounded-xl transition shadow">
+                    ✓ تحديد الكل كمقروء
+                </button>
+            </div>
+            <div id="notificationsListContainer" class="space-y-3.5">
+                <p class="text-center text-xs text-slate-400 py-4">لا توجد إشعارات جديدة حالياً.</p>
+            </div>
+            <button onclick="closeNotificationsPopup()" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white text-sm font-black py-3 mt-2 rounded-2xl" data-i18n="btnCloseModal">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+
+    <main id="loginSection" class="w-full max-w-lg my-auto flex flex-col items-center py-6 space-y-4">
+        <div class="w-full flex justify-between items-center bg-white/80 dark:bg-slate-900/80 p-3 px-5 ios-card border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                <span class="themeIcon">☀️</span>
+                <span class="themeText">الشمس</span>
+            </button>
+            <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                <span>🌐</span>
+                <span class="langText">English</span>
+            </button>
+        </div>
+        <div class="w-full flex justify-center">
+            <img src="Logo.png" alt="SANA Logo" class="w-full max-w-xs h-auto object-contain px-4">
+        </div>
+        <div class="ios-card w-full bg-white/90 dark:bg-slate-900/90 p-8 border border-slate-200 dark:border-slate-800 text-right">
+            <h1 id="txtTitle" data-i18n="portalTitle" class="text-2xl font-extrabold text-center text-slate-900 dark:text-white mb-1">بوابة المشرف الموقعي  👷</h1>
+            <p id="txtSubtitle" data-i18n="portalSubtitle" class="text-xs text-center text-slate-500 dark:text-slate-400 mb-6">يرجى تسجيل الدخول للوصول إلى اللوحة</p>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label id="lblEmail" data-i18n="lblEmail" class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 text-right">البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" required placeholder="supervisor@example.com" class="ios-input w-full p-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none">
+                </div>
+                <div>
+                    <label id="lblPassword" data-i18n="lblPassword" class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 text-right">كلمة المرور</label>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="ios-input w-full p-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sana focus:outline-none">
+                            <span id="passEyeIcon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-xs pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-400">
+                        <input type="checkbox" class="rounded accent-[#3A6B68] w-4 h-4">
+                        <span id="txtRemember" data-i18n="rememberMe">تذكر بياناتي</span>
+                    </label>
+                    <button type="button" class="text-[#3A6B68] dark:text-[#4B8581] font-bold hover:underline" id="txtForgot" data-i18n="forgotPass">نسيت كلمة المرور؟</button>
+                </div>
+                <button type="submit" id="btnLogin" data-i18n="loginBtn" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white font-extrabold py-4 text-base shadow-lg shadow-[#3A6B68]/30 transition mt-2">
+                    تسجيل الدخول
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <div id="homeView" class="hidden w-full max-w-xl space-y-5 pb-6 text-right">
+        <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+            <h2 class="text-lg font-black text-[#3A6B68] dark:text-[#4B8581]" data-i18n="submitNewReq">👷 تقديم طلب جديد</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold mb-1 text-right" data-i18n="reqType">نوع الطلب</label>
+                    <select id="ticketType" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-sm focus:outline-none text-slate-800 dark:text-slate-100">
+                        <option value="طلب دخول موقع">طلب دخول موقع (SLA: 30 min)</option>
+                        <option value="طلب ملفات">طلب ملفات وتصاميم (SLA: 60 min)</option>
+                        <option value="طلب فريق QC">ارسال طلب فريق QC (SLA: 120 min)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 text-right" data-i18n="reqDetails">تفاصيل الطلب ورقم الموقع</label>
+                    <textarea id="ticketTitle" rows="3" placeholder="FBG0001..." class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none"></textarea>
+                </div>
+                <button onclick="sendTicket()" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white font-bold py-3.5 text-sm shadow-md" data-i18n="btnSubmit">إرسال الطلب 🚀</button>
+                <p id="ticketStatus" class="text-center text-xs font-bold p-2.5 rounded-xl hidden transition-all duration-300"></p>
+            </div>
+        </div>
+
+        <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <h3 class="text-base font-bold" data-i18n="boardTitle">📋 الطلبات</h3>
+                <div class="flex items-center gap-3">
+                    <div class="relative flex items-center bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-2xl p-1 px-2.5">
+                        <select id="viewCategoryFilter" onchange="applyFilters()" class="bg-transparent text-xs font-extrabold text-[#3A6B68] dark:text-[#4B8581] focus:outline-none cursor-pointer">
+                            <option value="inbox">📥 صندوق الوارد</option>
+                            <option value="my_tickets">📌 طلباتي (الحية)</option>
+                            <option value="all">📂 جميع الطلبات</option>
+                        </select>
+                        <span id="ticketsCount" class="mr-2 px-2.5 py-0.5 text-xs font-black bg-[#3A6B68] text-white dark:bg-[#4B8581] rounded-xl shadow-sm border border-[#3A6B68]/30">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" onclick="toggleFilterControls()" class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-extrabold transition">
+                    <span class="flex items-center gap-2">
+                        <span>🔍</span>
+                        <span data-i18n="searchBy">بحث حسب</span>
+                    </span>
+                    <span id="searchToggleArrow" class="text-slate-400 text-xs transition-transform duration-300">▼</span>
+                </button>
+            </div>
+
+            <div id="filterControlsContainer" class="hidden space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 transition-all duration-300">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right" data-i18n="searchTitle">🔍 البحث باسم الطلب</label>
+                        <input type="text" id="searchNameInput" oninput="applyFilters()" placeholder="مثال: FBG0001" class="ios-input w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right" data-i18n="searchType">🏷️ البحث بنوع الطلب</label>
+                        <input type="text" id="searchTypeInput" oninput="applyFilters()" placeholder="مثال: طلب فريق QC" class="ios-input w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right" data-i18n="dateFilter">📅 فلترة نطاق التاريخ والوقت</label>
+                    <button type="button" onclick="toggleTimePicker()" class="w-full flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-[#3A6B68] transition">
+                        <span id="rangePickerLabel" data-i18n="allTimes">الجميع (كل الأوقات)</span>
+                        <span class="text-slate-400">🕒 ▼</span>
+                    </button>
+
+                    <div id="timePickerModal" class="hidden absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-2xl z-50 space-y-4 text-right">
+                        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+                            <span class="text-xs font-extrabold text-[#3A6B68] dark:text-[#4B8581]" data-i18n="timeRangeTitle">تحديد نطاق الوقت</span>
+                            <button onclick="toggleTimePicker()" class="text-slate-400 text-sm font-bold">✕</button>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-400 mb-2" data-i18n="quickOptions">⚡ خيارات سريعة:</span>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                                <button onclick="setQuickRange('today')" class="p-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] rounded-xl transition" data-i18n="today">اليوم</button>
+                                <button onclick="setQuickRange('last24')" class="p-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] rounded-xl transition" data-i18n="last24">آخر 24 ساعة</button>
+                                <button onclick="setQuickRange('last48')" class="p-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] rounded-xl transition" data-i18n="last48">آخر 48 ساعة</button>
+                                <button onclick="setQuickRange('thisWeek')" class="p-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] rounded-xl transition" data-i18n="thisWeek">هذا الأسبوع</button>
+                                <button onclick="setQuickRange('thisMonth')" class="p-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] rounded-xl transition" data-i18n="thisMonth">هذا الشهر</button>
+                                <button onclick="setQuickRange('all')" class="p-2 text-[11px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] rounded-xl transition" data-i18n="resetAll">إعادة ضبط (الكل)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right" data-i18n="sortBy">🔄 الفرز حسب</label>
+                    <select id="sortOption" onchange="applyFilters()" class="ios-input w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none text-slate-800 dark:text-slate-100">
+                        <option value="date_desc" data-i18n="sortNewest">الأحدث أولاً</option>
+                        <option value="date_asc" data-i18n="sortOldest">الأقدم أولاً</option>
+                        <option value="alpha_asc" data-i18n="sortAlphaAsc">أبجدي (أ-ي)</option>
+                        <option value="alpha_desc" data-i18n="sortAlphaDesc">أبجدي (ي-أ)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="ticketsContainer" class="space-y-3 pt-2"></div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل الطلب -->
+    <div id="ticketDetailModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                    <span id="modalTicketId" class="text-sm font-black text-[#3A6B68] dark:text-[#4B8581]"></span>
+                    <h3 id="modalTicketTitle" class="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5"></h3>
+                </div>
+                <button onclick="closeTicketModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl font-bold">✕</button>
+            </div>
+
+            <input type="hidden" id="modalCurrentTicketId">
+
+            <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/60 items-center">
+                <div>
+                    <span class="block text-xs font-bold text-slate-400" data-i18n="officeUserLabel">👤 موظف الأوفيس المسؤول:</span>
+                    <button id="modalOfficeUserBtn" onclick="openOfficeUserContactModal()" class="text-xs font-black text-[#3A6B68] dark:text-[#4B8581] hover:underline flex items-center gap-1 mt-0.5">
+                        <span id="modalOfficeUser"></span>
+                        <span class="text-[10px]">📇</span>
+                    </button>
+                </div>
+                <div>
+                    <span class="block text-xs font-bold text-slate-400" data-i18n="elapsedTimeLabel">⏱️ مدة الطلب المنقضية:</span>
+                    <div class="mt-1 inline-block px-3 py-1 bg-amber-400/10 dark:bg-yellow-500/10 border border-yellow-400/20 rounded-xl">
+                        <span id="modalElapsedTime" class="text-base font-black text-amber-500 dark:text-yellow-400 font-mono tracking-wide"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="text-xs font-black text-slate-700 dark:text-slate-300" data-i18n="officeNotesLabel">📝 ملاحظات ومخرجات المكتب:</h4>
+                <div id="modalOfficeNotes" class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs font-medium leading-relaxed"></div>
+            </div>
+
+            <div id="resubmitSection" class="hidden p-4 bg-yellow-500/10 border-2 border-yellow-400 rounded-2xl space-y-3">
+                <div class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 font-extrabold text-xs">
+                    <span>⚠️</span>
+                    <span data-i18n="needsEditNotice">هذا الطلب يتطلب تعديل البيانات، قم بتعديل الحقول أدناه ثم أعد الإرسال:</span>
+                </div>
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1" data-i18n="reqType">نوع الطلب</label>
+                        <select id="editTicketType" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
+                            <option value="طلب دخول موقع">طلب دخول موقع (SLA: 30 min)</option>
+                            <option value="طلب ملفات">طلب ملفات وتصاميم (SLA: 60 min)</option>
+                            <option value="طلب فريق QC">ارسال طلب فريق QC (SLA: 120 min)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1" data-i18n="reqDetails">عنوان ورقم الموقع والتفاصيل</label>
+                        <textarea id="editTicketTitle" rows="2" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1" data-i18n="fieldNotes">ملاحظات والتحديثات الجديدة</label>
+                        <textarea id="editTicketNotes" rows="2" placeholder="الملاحظات والتعديلات..." class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none"></textarea>
+                    </div>
+                </div>
+                <button onclick="resubmitTicket()" class="ios-button w-full bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-black py-3 text-xs shadow-md">
+                    <span data-i18n="btnResubmit">تحديث الطلب وإعادة الإرسال 🚀</span>
+                </button>
+            </div>
+
+            <div class="space-y-2 p-4 bg-emerald-500/10 dark:bg-emerald-950/30 rounded-2xl border border-emerald-500/30">
+                <h4 class="text-xs font-black text-emerald-700 dark:text-emerald-400" data-i18n="attachmentsLabel">📎 الملفات المرفقة:</h4>
+                <div id="modalAttachments" class="space-y-1.5"></div>
+            </div>
+
+            <div class="space-y-2 border-t border-slate-200 dark:border-slate-800 pt-3">
+                <h4 class="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5" data-i18n="historyTimelineLabel">
+                    <span>⏳</span> <span>سجل التغييرات والبيانات السابقة:</span>
+                </h4>
+                <div id="modalTimeline" class="space-y-2 text-xs"></div>
+            </div>
+
+            <button onclick="closeTicketModal()" class="ios-button w-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-3 mt-2" data-i18n="btnCloseModal">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+
+    <!-- النافذة المنبثقة لمعلومات وتفاصيل الموظف -->
+    <div id="officeUserModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[60] flex items-center justify-center p-4 hidden">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-sm w-full border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-[#3A6B68]/20 text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center mx-auto text-2xl font-bold border border-[#3A6B68]/30">👤</div>
+            <div>
+                <h3 id="ouModalName" class="text-base font-extrabold text-slate-900 dark:text-white">-</h3>
+                <span id="ouModalRole" class="text-xs font-semibold text-slate-400 block mt-0.5">-</span>
+            </div>
+            <div class="space-y-2 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-right">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <span class="text-slate-400" data-i18n="lblDirectManager">المدير المباشر:</span>
+                    <span id="ouModalManager" class="font-bold text-[#3A6B68] dark:text-[#4B8581]">-</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <span class="text-slate-400">المحافظة:</span>
+                    <span id="ouModalGov" class="font-bold">-</span>
+                </div>
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <span class="text-slate-400" data-i18n="lblPhone">رقم الهاتف:</span>
+                    <span id="ouModalPhone" class="font-bold font-mono">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400" data-i18n="lblEmail">البريد الإلكتروني:</span>
+                    <span id="ouModalEmail" class="font-bold font-mono truncate max-w-[180px]">-</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <a id="ouPhoneCallBtn" href="#" class="ios-button bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                    <span>📞</span> <span data-i18n="btnCall">اتصال مباشر</span>
+                </a>
+                <a id="ouWhatsappBtn" href="#" target="_blank" class="ios-button bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 text-xs flex items-center justify-center gap-1.5 shadow-sm">
+                    <span>💬</span> <span data-i18n="btnWhatsapp">واتساب</span>
+                </a>
+            </div>
+            <button onclick="closeOfficeUserModal()" class="ios-button w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs py-2.5" data-i18n="btnCloseModal">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="profileView" class="hidden w-full max-w-xl space-y-4 pb-6 text-right">
+        <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1" data-i18n="fullName">الاسم الكامل</label>
+                <div id="profileFullName" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-sm font-extrabold text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center"></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1" data-i18n="jobTitle">العنوان الوظيفي</label>
+                    <div id="profileJobTitle" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1" data-i18n="lblDirectManager">المدير المباشر</label>
+                    <div id="profileManager" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200"></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1" data-i18n="governorate">المحافظة</label>
+                    <div id="profileGovernorate" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1" data-i18n="lblPhone">رقم الهاتف</label>
+                    <div id="profilePhone" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 font-mono"></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">الطلبات المقبولة/النشطة</label>
+                    <div id="profileActiveCount" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-emerald-400">0 طلب</div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">إجمالي طلباتي</label>
+                    <div id="profileTotalCount" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-200">0 طلب</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">الجنس</label>
+                    <div id="profileGender" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-200">-</div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1" data-i18n="lblEmail">البريد الإلكتروني</label>
+                    <div id="profileEmail" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 font-mono"></div>
+                </div>
+            </div>
+            <div class="pt-2">
+                <button onclick="openChangePasswordModal()" class="w-full ios-button bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-bold py-3.5 text-center text-xs shadow-lg transition flex items-center justify-center gap-2">
+                    <span>🔑</span> <span>تغيير الرمز السري</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificationsView" class="hidden w-full max-w-xl space-y-4 pb-6 text-right">
+        <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4">
+            <h2 class="text-base font-black text-[#3A6B68] dark:text-[#4B8581] border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center gap-2">
+                <span>⚙️</span> <span data-i18n="notifSettingsTitle">إعدادات الإشعارات والتنبيهات</span>
+            </h2>
+            <div class="space-y-3 text-xs">
+                <label class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl cursor-pointer">
+                    <span class="font-bold text-slate-700 dark:text-slate-200">تنبيهات تغيير حالة الطلب</span>
+                    <input type="checkbox" checked class="w-4 h-4 accent-[#3A6B68] rounded">
+                </label>
+                <label class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl cursor-pointer">
+                    <span class="font-bold text-slate-700 dark:text-slate-200">إشعارات التعديل المطلوبة</span>
+                    <input type="checkbox" checked class="w-4 h-4 accent-[#3A6B68] rounded">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تسجيل الخروج -->
+    <div id="logoutModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-xs w-full border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl">
+            <div class="w-10 h-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-lg">⚠️</div>
+            <h3 class="text-sm font-bold" data-i18n="confirmLogoutTitle">تأكيد تسجيل الخروج</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="confirmLogoutDesc">هل أنت متأكد من أنك تريد الخروج من الحساب الآن؟</p>
+            <div class="flex gap-2 pt-1">
+                <button onclick="confirmLogout()" class="ios-button flex-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold py-3" data-i18n="yesLogout">نعم، خروج</button>
+                <button onclick="closeLogoutModal()" class="ios-button flex-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold py-3" data-i18n="cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تغيير كلمة المرور -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-sm w-full border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-slate-100">🔒 تغيير الرمز السري</h3>
+                <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">كلمة المرور الجديدة</label>
+                    <input type="password" id="newPasswordInput" placeholder="••••••••" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-700 text-xs text-slate-100">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="submitNewPassword()" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-bold py-3">حفظ التغيير</button>
+                <button onclick="closeChangePasswordModal()" class="ios-button flex-1 bg-slate-800 text-slate-300 text-xs font-bold py-3">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://xliwjzykrtlbujqkmqke.supabase.co/';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ZKkCIsG9ln0xiYLbR8EQlA_wUhdEP_L';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const translations = {
+            ar: {
+                navHome: "الصفحة الرئيسية", navProfile: "حسابي", navNotifications: "الإشعارات", btnLogout: "تسجيل الخروج",
+                portalTitle: "بوابة المشرف الموقعي", portalSubtitle: "يرجى تسجيل الدخول للوصول إلى اللوحة",
+                lblEmail: "البريد الإلكتروني", lblPassword: "كلمة المرور", loginBtn: "تسجيل الدخول", rememberMe: "تذكر بياناتي",
+                forgotPass: "نسيت كلمة المرور؟", submitNewReq: "👷 تقديم طلب جديد", reqType: "نوع الطلب", reqDetails: "تفاصيل الطلب ورقم الموقع",
+                btnSubmit: "إرسال الطلب 🚀", boardTitle: "📋 الطلبات", optMyTickets: "طلباتي الخاصة",
+                searchBy: "بحث حسب", searchTitle: "🔍 البحث باسم الطلب", searchType: "🏷️ البحث بنوع الطلب", dateFilter: "📅 فلترة نطاق التاريخ والوقت",
+                allTimes: "الجميع (كل الأوقات)", timeRangeTitle: "تحديد نطاق الوقت", quickOptions: "⚡ خيارات سريعة:", today: "اليوم",
+                last24: "آخر 24 ساعة", last48: "آخر 48 ساعة", thisWeek: "هذا الأسبوع", thisMonth: "هذا الشهر", resetAll: "إعادة ضبط (الكل)",
+                sortBy: "🔄 الفرز حسب", sortNewest: "الأحدث أولاً", sortOldest: "الأقدم أولاً", sortAlphaAsc: "أبجدي (أ-ي)", sortAlphaDesc: "أبجدي (ي-أ)",
+                officeUserLabel: "👤 موظف الأوفيس المسؤول:", elapsedTimeLabel: "⏱️ مدة الطلب المنقضية:", officeNotesLabel: "📝 ملاحظات ومخرجات المكتب:",
+                needsEditNotice: "هذا الطلب يتطلب تعديل البيانات، قم بتعديل الحقول أدناه ثم أعد الإرسال:", fieldNotes: "ملاحظات والتحديثات الجديدة",
+                btnResubmit: "تحديث الطلب وإعادة الإرسال 🚀", attachmentsLabel: "📎 الملفات المرفقة:", historyTimelineLabel: "⏳ سجل التغييرات والبيانات السابقة:",
+                btnCloseModal: "إغلاق النافذة", btnCall: "اتصال مباشر", btnWhatsapp: "واتساب", fullName: "الاسم الكامل", jobTitle: "العنوان الوظيفي",
+                lblDirectManager: "المدير المباشر", governorate: "المحافظة", lblPhone: "رقم الهاتف", notifSettingsTitle: "إعدادات الإشعارات والتنبيهات",
+                confirmLogoutTitle: "تأكيد تسجيل الخروج", confirmLogoutDesc: "هل أنت متأكد من أنك تريد الخروج من الحساب الآن؟", yesLogout: "نعم، خروج",
+                cancel: "إلغاء", popupNotifTitle: "الإشعارات والتنبيهات"
+            },
+            en: {
+                navHome: "Home Page", navProfile: "My Profile", navNotifications: "Notifications", btnLogout: "Logout",
+                portalTitle: "Site Supervisor Portal", portalSubtitle: "Please sign in to access dashboard",
+                lblEmail: "Email Address", lblPassword: "Password", loginBtn: "Sign In", rememberMe: "Remember Me",
+                forgotPass: "Forgot Password?", submitNewReq: "👷 Submit New Ticket", reqType: "Ticket Type", reqDetails: "Ticket Details & Site Code",
+                btnSubmit: "Submit Ticket 🚀", boardTitle: "📋 Tickets Board", optMyTickets: "My Tickets Only",
+                searchBy: "Search By", searchTitle: "🔍 Search Title", searchType: "🏷️ Search Type", dateFilter: "📅 Filter Date Range",
+                allTimes: "All Times", timeRangeTitle: "Select Time Range", quickOptions: "⚡ Quick Range:", today: "Today",
+                last24: "Last 24 Hours", last48: "Last 48 Hours", thisWeek: "This Week", thisMonth: "This Month", resetAll: "Reset (All)",
+                sortBy: "🔄 Sort By", sortNewest: "Newest First", sortOldest: "Oldest First", sortAlphaAsc: "Alphabetical (A-Z)", sortAlphaDesc: "Alphabetical (Z-A)",
+                officeUserLabel: "👤 Assigned Office Engineer:", elapsedTimeLabel: "⏱️ Elapsed SLA Time:", officeNotesLabel: "📝 Office Output & Notes:",
+                needsEditNotice: "This ticket requires modification, update fields below:", fieldNotes: "Field Notes & Updates",
+                btnResubmit: "Update & Resubmit 🚀", attachmentsLabel: "📎 Attached Files:", historyTimelineLabel: "⏳ Timeline History:",
+                btnCloseModal: "Close Window", btnCall: "Direct Call", btnWhatsapp: "WhatsApp", fullName: "Full Name", jobTitle: "Job Title",
+                lblDirectManager: "Direct Manager", governorate: "Governorate", lblPhone: "Phone Number", notifSettingsTitle: "Notification Settings",
+                confirmLogoutTitle: "Confirm Logout", confirmLogoutDesc: "Are you sure you want to log out?", yesLogout: "Yes, Logout",
+                cancel: "Cancel", popupNotifTitle: "Notifications & Status Changes"
+            }
+        };
+
+        let currentLang = 'ar';
+        let allFetchedTickets = [];
+        let notificationsList = [];
+        let selectedTimeFilter = 'all';
+        let currentUserProfile = { id: '', name: '', role: 'Site Supervisor', email: '', manager: '-', phone: '-', governorate: '-', gender: 'Male' };
+        let activeOfficeUser = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
+                if (session && session.user) {
+                    const user = session.user;
+                    currentUserProfile.id = user.id;
+                    const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                    if (profileData) {
+                        currentUserProfile.name = profileData.full_name || user.email.split('@')[0];
+                        currentUserProfile.email = user.email;
+                        currentUserProfile.role = profileData.job_title || 'Site Supervisor';
+                        currentUserProfile.governorate = profileData.governorate || '-';
+                        currentUserProfile.phone = profileData.phone || '-';
+                        currentUserProfile.manager = profileData.direct_manager || '-';
+                        currentUserProfile.gender = profileData.gender || 'Male';
+                    } else {
+                        currentUserProfile.name = user.email.split('@')[0];
+                        currentUserProfile.email = user.email;
+                    }
+
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainHeader').classList.remove('hidden');
+                    document.getElementById('mainLogoBanner').classList.remove('hidden');
+                    navigateTo('home');
+                    setupRealtimeSubscription();
+                }
+            } catch (err) { console.error(err.message); }
+        });
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            document.querySelectorAll('.langText').forEach(el => { el.innerText = (currentLang === 'ar') ? 'English' : 'العربية'; });
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (translations[currentLang][key]) elem.innerText = translations[currentLang][key];
+            });
+            applyFilters();
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.querySelectorAll('.themeIcon').forEach(el => { el.innerText = isDark ? '☀️' : '🌙'; });
+            document.querySelectorAll('.themeText').forEach(el => {
+                el.innerText = isDark ? ((currentLang === 'ar') ? 'الشمس' : 'Light') : ((currentLang === 'ar') ? 'الظلام' : 'Dark');
+            });
+        }
+
+        async function sendTicket() {
+            const type = document.getElementById('ticketType').value;
+            const title = document.getElementById('ticketTitle').value.trim();
+            const statusEl = document.getElementById('ticketStatus');
+
+            if (!title) {
+                statusEl.innerText = '⚠️ يرجى كتابة تفاصيل الطلب';
+                statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+                return;
+            }
+
+            let slaMinutes = 60;
+            if (type.includes('30 min')) slaMinutes = 30;
+            else if (type.includes('120 min')) slaMinutes = 120;
+
+            const now = new Date();
+            const dueAt = new Date(now.getTime() + slaMinutes * 60000);
+
+            const initialHistory = [{
+                type: 'status_change',
+                status: 'جديد',
+                timestamp: now.toISOString(),
+                description: 'تم إنشاء الطلب بنجاح'
+            }];
+
+            const payload = {
+                ticket_type: type,
+                title: title,
+                zone_address: title,
+                status: 'جديد',
+                sender_id: currentUserProfile.id,
+                sender_name: currentUserProfile.name,
+                user_id: currentUserProfile.id,
+                user_name: currentUserProfile.name,
+                created_at: now.toISOString(),
+                due_at: dueAt.toISOString(),
+                history: initialHistory
+            };
+
+            const { data, error } = await supabaseClient.from('tickets').insert([payload]).select();
+            if (!error) {
+                statusEl.innerText = '✅ تم إرسال الطلب بنجاح إلى الباك أوفيس!';
+                statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-emerald-500/20 text-emerald-500 block';
+                document.getElementById('ticketTitle').value = '';
+                fetchTickets();
+                setTimeout(() => statusEl.classList.add('hidden'), 4000);
+            } else {
+                statusEl.innerText = '❌ فشل الإرسال: ' + error.message;
+                statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+            }
+        }
+
+        function toggleFilterControls() {
+            const container = document.getElementById('filterControlsContainer');
+            const arrow = document.getElementById('searchToggleArrow');
+            container.classList.toggle('hidden');
+            arrow.style.transform = container.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function toggleTimePicker() {
+            document.getElementById('timePickerModal').classList.toggle('hidden');
+        }
+
+        function setQuickRange(type) {
+            selectedTimeFilter = type;
+            const labels = {
+                today: 'اليوم', last24: 'آخر 24 ساعة', last48: 'آخر 48 ساعة',
+                thisWeek: 'هذا الأسبوع', thisMonth: 'هذا الشهر', all: 'الجميع (كل الأوقات)'
+            };
+            document.getElementById('rangePickerLabel').innerText = labels[type] || 'الجميع';
+            toggleTimePicker();
+            applyFilters();
+        }
+
+        function formatCreatedDate(dateString) {
+            if (!dateString) return '-';
+            const d = new Date(dateString);
+            const date = d.toISOString().split('T')[0];
+            const time = d.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+            return `${time} ${date}`;
+        }
+
+        function calculateElapsedTime(dateString) {
+            if (!dateString) return '0 دقيقة';
+            const created = new Date(dateString);
+            const now = new Date();
+            let diffMs = now - created;
+
+            if (diffMs < 0) diffMs = 0;
+
+            const totalMinutes = Math.floor(diffMs / (1000 * 60));
+            const days = Math.floor(totalMinutes / (60 * 24));
+            const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+            const minutes = totalMinutes % 60;
+
+            let resultParts = [];
+            if (days > 0) resultParts.push(`${days} يوم`);
+            if (hours > 0) resultParts.push(`${hours} ساعة`);
+            resultParts.push(`${minutes} دقيقة`);
+
+            return resultParts.join(' ');
+        }
+
+        function renderTickets(tickets) {
+            const container = document.getElementById('ticketsContainer');
+            document.getElementById('ticketsCount').innerText = tickets.length;
+
+            if (!tickets || tickets.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-bold">لا توجد طلبات مطابقة للفلترة المحددة.</div>`;
+                return;
+            }
+
+            container.innerHTML = tickets.map(ticket => {
+                let statusColor = 'bg-blue-500/20 text-blue-500 border-blue-500/30';
+                if (ticket.status === 'مكتملة' || ticket.status === 'مكتمل') statusColor = 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30';
+                else if (ticket.status === 'معلق' || ticket.status === 'متوقفة' || ticket.status === 'قيد الانتظار') statusColor = 'bg-amber-500/20 text-amber-500 border-amber-500/30';
+                else if (ticket.status === 'تعديل المطلوبة' || ticket.status === 'تحتاج تعديل') statusColor = 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30 animate-pulse';
+
+                const ticketNum = ticket.ticket_number || '#00001';
+                const createdDateTimeFormatted = formatCreatedDate(ticket.created_at);
+
+                return `
+                    <div onclick="openTicketModal('${ticket.id}')" class="ticket-card ios-card bg-slate-50/80 dark:bg-slate-800/60 p-4 border border-slate-200 dark:border-slate-700/80 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs sm:text-sm font-black text-[#3A6B68] dark:text-[#4B8581] font-mono">${ticketNum}</span>
+                                <h4 class="text-base font-extrabold text-slate-900 dark:text-white mt-1 leading-snug">${ticket.zone_address || ticket.title || '-'}</h4>
+                            </div>
+                            <span class="px-3 py-1 rounded-xl text-xs font-bold border ${statusColor}">${ticket.status || 'جديد'}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs sm:text-sm pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-slate-500 dark:text-slate-400">
+                            <span class="font-extrabold text-[#3A6B68] dark:text-[#4B8581] bg-[#3A6B68]/10 px-2.5 py-1 rounded-lg">${ticket.ticket_type || ticket.type || '-'}</span>
+                            <span class="font-mono text-xs font-bold text-slate-600 dark:text-slate-300">📅 ${createdDateTimeFormatted}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function applyFilters() {
+            const searchName = document.getElementById('searchNameInput').value.trim().toLowerCase();
+            const searchType = document.getElementById('searchTypeInput').value.trim().toLowerCase();
+            const sortOption = document.getElementById('sortOption').value;
+            const viewCategory = document.getElementById('viewCategoryFilter').value;
+
+            const now = new Date();
+
+            let result = allFetchedTickets.filter(t => {
+                if (t.user_id !== currentUserProfile.id && t.sender_id !== currentUserProfile.id) return false;
+                
+                const status = t.status || '';
+
+                if (viewCategory === 'inbox') {
+                    const isEditNeeded = status === 'تعديل المطلوبة' || status === 'تحتاج تعديل';
+                    const isCompleted = status === 'مكتملة' || status === 'مكتمل';
+
+                    if (isEditNeeded) {
+                    } else if (isCompleted) {
+                        const history = Array.isArray(t.history) ? t.history : [];
+                        const completedEvent = history.slice().reverse().find(h => h.status === 'مكتمل' || h.status === 'مكتملة');
+                        const completedTime = completedEvent ? new Date(completedEvent.timestamp) : new Date(t.updated_at || t.created_at);
+                        
+                        const hoursPassed = (now - completedTime) / (1000 * 60 * 60);
+                        if (hoursPassed > 48) return false;
+                    } else {
+                        return false;
+                    }
+                } else if (viewCategory === 'my_tickets') {
+                    const isLive = status === 'جديد' || status === 'قيد الانتظار' || status === 'متوقفة' || status === 'معلق' || status === 'تحتاج تعديل' || status === 'تعديل المطلوبة';
+                    if (!isLive) return false;
+                }
+
+                const title = (t.zone_address || t.title || '').toLowerCase();
+                const type = (t.ticket_type || t.type || '').toLowerCase();
+                if (searchName && !title.includes(searchName)) return false;
+                if (searchType && !type.includes(searchType)) return false;
+
+                if (selectedTimeFilter !== 'all') {
+                    const ticketDate = new Date(t.created_at || Date.now());
+                    if (selectedTimeFilter === 'today' && ticketDate.toDateString() !== now.toDateString()) return false;
+                    if (selectedTimeFilter === 'last24' && (now - ticketDate) > 86400000) return false;
+                    if (selectedTimeFilter === 'last48' && (now - ticketDate) > 172800000) return false;
+                }
+
+                return true;
+            });
+
+            result.sort((a, b) => {
+                if (sortOption === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
+                if (sortOption === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+                if (sortOption === 'alpha_asc') return (a.zone_address || a.title || '').localeCompare(b.zone_address || b.title || '');
+                if (sortOption === 'alpha_desc') return (b.zone_address || b.title || '').localeCompare(a.zone_address || a.title || '');
+                return 0;
+            });
+
+            renderTickets(result);
+        }
+
+        async function fetchTickets() {
+            const { data: tickets } = await supabaseClient
+                .from('tickets')
+                .select('*')
+                .or(`user_id.eq.${currentUserProfile.id},sender_id.eq.${currentUserProfile.id}`)
+                .order('created_at', { ascending: false });
+                
+            allFetchedTickets = (tickets || []).map((t, index, arr) => {
+                const seq = arr.length - index;
+                return { ...t, ticket_number: t.ticket_number || '#' + String(seq).padStart(3, '0') };
+            });
+
+            syncNotificationsFromTickets();
+            applyFilters();
+        }
+
+        function syncNotificationsFromTickets() {
+            const readMap = JSON.parse(localStorage.getItem('read_notifications_' + currentUserProfile.id) || '{}');
+            notificationsList = [];
+
+            allFetchedTickets.forEach(t => {
+                const history = Array.isArray(t.history) ? t.history : [];
+
+                if (history.length > 0) {
+                    history.forEach((h, idx) => {
+                        const notifId = `${t.id}_h_${idx}`;
+                        const createdAt = new Date(h.timestamp || t.created_at || Date.now());
+                        const dateStr = createdAt.toISOString().split('T')[0];
+                        const timeStr = createdAt.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                        
+                        let badgeText = `تحديث: ${h.status || 'حالة جديدة'}`;
+                        if (h.type === 'edit') badgeText = 'تعديل بيانات';
+                        else if (idx === 0) badgeText = 'طلب جديد';
+
+                        notificationsList.push({
+                            id: notifId,
+                            ticketId: t.id,
+                            ticketNumber: t.ticket_number || '#101',
+                            ticketType: t.ticket_type || 'طلب موقع',
+                            title: t.zone_address || t.title || 'طلب موقع',
+                            status: h.status || t.status || 'تغيرت الحالة',
+                            description: h.description || `تم تغيير حالة الطلب إلى: ${h.status}`,
+                            badgeText: badgeText,
+                            dateTime: `${timeStr} ${dateStr}`,
+                            timestamp: createdAt.getTime(),
+                            read: readMap[notifId] || false
+                        });
+                    });
+                } else {
+                    const createdAt = new Date(t.created_at || Date.now());
+                    const dateStr = createdAt.toISOString().split('T')[0];
+                    const timeStr = createdAt.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+                    notificationsList.push({
+                        id: t.id,
+                        ticketId: t.id,
+                        ticketNumber: t.ticket_number || '#101',
+                        ticketType: t.ticket_type || 'طلب دخول موقع',
+                        title: t.zone_address || t.title || 'طلب موقع',
+                        status: t.status || 'تحديث حالة',
+                        description: `الحالة الحالية: ${t.status || 'جديد'}`,
+                        badgeText: 'تحديث الطلب',
+                        dateTime: `${timeStr} ${dateStr}`,
+                        timestamp: createdAt.getTime(),
+                        read: readMap[t.id] || false
+                    });
+                }
+            });
+
+            notificationsList.sort((a, b) => b.timestamp - a.timestamp);
+            updateNotifBadge();
+        }
+
+        // *** الإصلاح الرئيسي لمشكلة ظهور التغييرات آنياً ***
+        function setupRealtimeSubscription() {
+            supabaseClient
+                .channel('public:tickets:realtime_all')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'tickets' },
+                    (payload) => {
+                        fetchTickets();
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Realtime subscription connected!');
+                    }
+                });
+        }
+
+        function updateNotifBadge() {
+            const badge = document.getElementById('notifBadge');
+            const unreadCount = notificationsList.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                badge.innerText = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderNotificationsList() {
+            const container = document.getElementById('notificationsListContainer');
+            const unreadNotifications = notificationsList.filter(n => !n.read);
+
+            if (unreadNotifications.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6 font-bold">🎉 تم قراءة جميع الإشعارات، صندوق الإشعارات فارغ حالياً.</p>`;
+                document.getElementById('markAllContainer').classList.add('hidden');
+                return;
+            } else {
+                document.getElementById('markAllContainer').classList.remove('hidden');
+            }
+
+            container.innerHTML = unreadNotifications.map((n) => {
+                let statusColorClass = 'text-amber-400';
+                if (n.status === 'مكتمل' || n.status === 'مكتملة') statusColorClass = 'text-emerald-400';
+                else if (n.status === 'تحتاج تعديل' || n.status === 'تعديل المطلوبة') statusColorClass = 'text-yellow-400';
+                else if (n.status === 'قيد الانتظار' || n.status === 'متوقفة') statusColorClass = 'text-rose-400';
+                else if (n.status === 'تحت المعالجة' || n.status === 'قيد معالجه') statusColorClass = 'text-blue-400';
+
+                return `
+                    <div onclick="handleNotificationClick('${n.id}', '${n.ticketId}')" class="relative rounded-2xl p-4 transition-all duration-200 cursor-pointer border-2 border-[#38bdf8]/40 bg-[#0c1a30] hover:bg-[#112342] shadow-lg">
+                        <div class="flex justify-between items-start mb-1 text-[11px] font-bold">
+                            <span class="text-slate-400 font-mono tracking-wide">${n.dateTime}</span>
+                            <span class="text-teal-400 font-extrabold">${n.ticketNumber} - ${n.ticketType}</span>
+                        </div>
+
+                        <div class="text-right my-2">
+                            <h4 class="text-sm font-black text-white leading-tight">${n.title}</h4>
+                            <p class="text-xs text-slate-300 mt-1">${n.description}</p>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-3 pt-1">
+                            <div>
+                                <span class="bg-[#0284c7] hover:bg-[#0369a1] text-white text-[10px] font-black px-3 py-1 rounded-xl shadow-md transition">${n.badgeText}</span>
+                            </div>
+                            <div class="text-xs font-black">
+                                <span class="text-slate-300">الحالة: </span>
+                                <span class="${statusColorClass}">${n.status}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function markAllNotificationsAsRead() {
+            const readMap = JSON.parse(localStorage.getItem('read_notifications_' + currentUserProfile.id) || '{}');
+            notificationsList.forEach(n => {
+                n.read = true;
+                readMap[n.id] = true;
+            });
+            localStorage.setItem('read_notifications_' + currentUserProfile.id, JSON.stringify(readMap));
+            updateNotifBadge();
+            renderNotificationsList();
+        }
+
+        function handleNotificationClick(notifId, ticketId) {
+            const notif = notificationsList.find(n => n.id === notifId);
+            if (notif) {
+                notif.read = true;
+                const readMap = JSON.parse(localStorage.getItem('read_notifications_' + currentUserProfile.id) || '{}');
+                readMap[notifId] = true;
+                localStorage.setItem('read_notifications_' + currentUserProfile.id, JSON.stringify(readMap));
+            }
+            updateNotifBadge();
+            renderNotificationsList();
+            closeNotificationsPopup();
+            
+            if (ticketId && ticketId !== 'null') {
+                openTicketModal(ticketId);
+            }
+        }
+
+        function openNotificationsPopup() {
+            renderNotificationsList();
+            document.getElementById('notificationsPopup').classList.remove('hidden');
+        }
+
+        function closeNotificationsPopup() {
+            document.getElementById('notificationsPopup').classList.add('hidden');
+        }
+
+        async function openTicketModal(ticketId) {
+            const ticket = allFetchedTickets.find(t => t.id == ticketId);
+            if (!ticket) return;
+
+            document.getElementById('modalCurrentTicketId').value = ticket.id;
+            document.getElementById('modalTicketId').innerText = ticket.ticket_number || '#00001';
+            document.getElementById('modalTicketTitle').innerText = ticket.zone_address || ticket.title || '-';
+
+            const officeName = ticket.office_assignee_name || 'لم يستلم أحد الطلب بعد';
+            document.getElementById('modalOfficeUser').innerText = officeName;
+
+            if (ticket.office_assignee_id) {
+                const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', ticket.office_assignee_id).single();
+                activeOfficeUser = prof || { full_name: officeName, job_title: 'Office Engineer', phone: '-', email: '-' };
+            } else {
+                activeOfficeUser = { full_name: officeName, job_title: 'Office Engineer', phone: '-', email: '-' };
+            }
+
+            document.getElementById('modalElapsedTime').innerText = calculateElapsedTime(ticket.created_at);
+            document.getElementById('modalOfficeNotes').innerText = ticket.notes || 'لا توجد ملاحظات مدخلة حتى الآن من مكتب الدعم.';
+
+            const resubmitSec = document.getElementById('resubmitSection');
+            if (ticket.status === 'تعديل المطلوبة' || ticket.status === 'تحتاج تعديل') {
+                resubmitSec.classList.remove('hidden');
+                document.getElementById('editTicketType').value = ticket.ticket_type || ticket.type || 'طلب دخول موقع';
+                document.getElementById('editTicketTitle').value = ticket.zone_address || ticket.title || '';
+            } else {
+                resubmitSec.classList.add('hidden');
+            }
+
+            const attachContainer = document.getElementById('modalAttachments');
+            if (ticket.file_url) {
+                attachContainer.innerHTML = `<a href="${ticket.file_url}" target="_blank" class="text-xs text-[#3A6B68] dark:text-[#4B8581] font-bold underline">📄 تحميل المرفق (${ticket.file_url})</a>`;
+            } else {
+                attachContainer.innerHTML = `<span class="text-xs text-slate-400">لا توجد ملفات مرفقة بهذا الطلب</span>`;
+            }
+
+            const timeline = document.getElementById('modalTimeline');
+            const history = Array.isArray(ticket.history) ? ticket.history : [];
+
+            if (history.length === 0) {
+                timeline.innerHTML = `
+                    <div class="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-2xl flex justify-between items-center text-slate-300">
+                        <span class="font-bold flex items-center gap-1.5">📌 جديد / قيد الانتظار</span>
+                        <span class="font-mono text-[11px]">${formatCreatedDate(ticket.created_at)}</span>
+                    </div>
+                `;
+            } else {
+                const sortedHistory = history.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                timeline.innerHTML = sortedHistory.map(item => {
+                    const formattedDate = formatCreatedDate(item.timestamp);
+                    if (item.type === 'edit') {
+                        return `
+                            <div class="p-3 bg-amber-500/10 dark:bg-yellow-500/10 border border-yellow-500/30 rounded-2xl space-y-1">
+                                <div class="flex justify-between items-center text-yellow-500 dark:text-yellow-400 font-extrabold text-xs">
+                                    <span class="flex items-center gap-1">📑 نسخة سابقة معدلة:</span>
+                                    <span class="font-mono text-[11px]">${formattedDate}</span>
+                                </div>
+                                <div class="text-slate-800 dark:text-slate-100 font-bold text-xs">
+                                    ${item.title} <span class="text-slate-400">(${item.ticket_type})</span>
+                                </div>
+                                ${item.notes ? `<div class="text-[11px] text-slate-400">ملاحظات التعديل: ${item.notes}</div>` : ''}
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="p-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl flex justify-between items-center">
+                                <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                    <span class="text-rose-400">📌</span> ${item.status}
+                                </span>
+                                <span class="font-mono text-[11px] text-slate-400">${formattedDate}</span>
+                            </div>
+                        `;
+                    }
+                }).join('');
+            }
+
+            document.getElementById('ticketDetailModal').classList.remove('hidden');
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticketDetailModal').classList.add('hidden');
+        }
+
+        async function resubmitTicket() {
+            const ticketId = document.getElementById('modalCurrentTicketId').value;
+            const newType = document.getElementById('editTicketType').value;
+            const newTitle = document.getElementById('editTicketTitle').value;
+            const notes = document.getElementById('editTicketNotes').value;
+
+            const ticket = allFetchedTickets.find(t => t.id == ticketId);
+            if (!ticket) return;
+
+            const currentHistory = Array.isArray(ticket.history) ? [...ticket.history] : [];
+            const nowIso = new Date().toISOString();
+
+            currentHistory.push({
+                type: 'edit',
+                ticket_type: ticket.ticket_type || ticket.type,
+                title: ticket.zone_address || ticket.title,
+                notes: notes,
+                timestamp: nowIso
+            });
+
+            currentHistory.push({
+                type: 'status_change',
+                status: 'تم التعديل وإعادة الإرسال',
+                timestamp: nowIso,
+                description: 'قام المشرف الموقعي بتعديل البيانات وإعادة الإرسال'
+            });
+
+            const payload = {
+                ticket_type: newType,
+                title: newTitle,
+                zone_address: newTitle,
+                notes: notes,
+                status: 'جديد',
+                history: currentHistory
+            };
+
+            const { error } = await supabaseClient.from('tickets').update(payload).eq('id', ticketId);
+            if (!error) {
+                alert('تم تحديث الطلب وإعادة إرساله بنجاح!');
+                closeTicketModal();
+                fetchTickets();
+            } else {
+                alert('فشل التحديث: ' + error.message);
+            }
+        }
+
+        async function openOfficeUserContactModal() {
+            if (!activeOfficeUser) return;
+            document.getElementById('ouModalName').innerText = activeOfficeUser.full_name || '-';
+            document.getElementById('ouModalRole').innerText = activeOfficeUser.job_title || 'Office Engineer';
+            document.getElementById('ouModalManager').innerText = activeOfficeUser.direct_manager || '-';
+            document.getElementById('ouModalGov').innerText = activeOfficeUser.governorate || '-';
+            document.getElementById('ouModalPhone').innerText = activeOfficeUser.phone || '-';
+            document.getElementById('ouModalEmail').innerText = activeOfficeUser.email || '-';
+
+            const phone = activeOfficeUser.phone || '';
+            document.getElementById('ouPhoneCallBtn').href = `tel:${phone}`;
+            document.getElementById('ouWhatsappBtn').href = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
+
+            document.getElementById('officeUserModal').classList.remove('hidden');
+        }
+
+        function closeOfficeUserModal() {
+            document.getElementById('officeUserModal').classList.add('hidden');
+        }
+
+        function navigateTo(view) {
+            closeSidebar();
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('profileView').classList.add('hidden');
+            document.getElementById('notificationsView').classList.add('hidden');
+
+            if (view === 'home') {
+                document.getElementById('homeView').classList.remove('hidden');
+                fetchTickets();
+            } else if (view === 'profile') {
+                loadProfileData();
+                document.getElementById('profileView').classList.remove('hidden');
+            } else if (view === 'notifications') {
+                document.getElementById('notificationsView').classList.remove('hidden');
+            }
+        }
+
+        async function loadProfileData() {
+            const { data: tickets } = await supabaseClient.from('tickets').select('*').eq('user_id', currentUserProfile.id);
+            const total = tickets ? tickets.length : 0;
+            const active = tickets ? tickets.filter(t => t.status !== 'مكتملة' && t.status !== 'مكتمل').length : 0;
+
+            document.getElementById('profileFullName').innerText = currentUserProfile.name || '-';
+            document.getElementById('profileJobTitle').innerText = currentUserProfile.role || '-';
+            document.getElementById('profileManager').innerText = currentUserProfile.manager || '-';
+            document.getElementById('profileGovernorate').innerText = currentUserProfile.governorate || '-';
+            document.getElementById('profilePhone').innerText = currentUserProfile.phone || '-';
+            document.getElementById('profileEmail').innerText = currentUserProfile.email || '-';
+            document.getElementById('profileGender').innerText = currentUserProfile.gender || 'Male';
+            document.getElementById('profileActiveCount').innerText = `${active} طلب`;
+            document.getElementById('profileTotalCount').innerText = `${total} طلب`;
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('sidebarOverlay').classList.remove('opacity-0');
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+            }, 10);
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.add('opacity-0');
+            setTimeout(() => document.getElementById('sidebarOverlay').classList.add('hidden'), 300);
+        }
+
+        function openLogoutModal() { closeSidebar(); document.getElementById('logoutModal').classList.remove('hidden'); }
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.add('hidden'); }
+        async function confirmLogout() { await supabaseClient.auth.signOut(); location.reload(); }
+
+        function openChangePasswordModal() { document.getElementById('changePasswordModal').classList.remove('hidden'); }
+        function closeChangePasswordModal() { document.getElementById('changePasswordModal').classList.add('hidden'); }
+        async function submitNewPassword() {
+            const newPassword = document.getElementById('newPasswordInput').value;
+            if (!newPassword) { alert('يرجى إدخال كلمة المرور الجديدة'); return; }
+            const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+            if (!error) {
+                alert('تم تحديث الرمز السري بنجاح');
+                closeChangePasswordModal();
+                document.getElementById('newPasswordInput').value = '';
+            } else { alert('فشل التحديث: ' + error.message); }
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('loginPassword');
+            const passEye = document.getElementById('passEyeIcon');
+            if (passInput.type === 'password') { passInput.type = 'text'; passEye.innerText = '🙈'; }
+            else { passInput.type = 'password'; passEye.innerText = '👁️'; }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+                if (error) throw error;
+                const user = data.user;
+                currentUserProfile.id = user.id;
+
+                const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                if (profileData) {
+                    currentUserProfile.name = profileData.full_name || email.split('@')[0];
+                    currentUserProfile.email = user.email;
+                    currentUserProfile.role = profileData.job_title || 'Site Supervisor';
+                    currentUserProfile.governorate = profileData.governorate || '-';
+                    currentUserProfile.phone = profileData.phone || '-';
+                    currentUserProfile.manager = profileData.direct_manager || '-';
+                    currentUserProfile.gender = profileData.gender || 'Male';
+                } else {
+                    currentUserProfile.name = email.split('@')[0];
+                    currentUserProfile.email = user.email;
+                }
+
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainHeader').classList.remove('hidden');
+                document.getElementById('mainLogoBanner').classList.remove('hidden');
+                navigateTo('home');
+                setupRealtimeSubscription();
+            } catch (err) { alert('فشل تسجيل الدخول: ' + err.message); }
+        }
+    </script>
+</body>
+</html>

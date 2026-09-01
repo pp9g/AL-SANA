@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="ar" class="dark" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الباك أوفيس - SANA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        sana: {
+                            DEFAULT: '#3A6B68',
+                            hover: '#2E5553',
+                            light: '#4B8581',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            text-align: right;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: stretch;
+            background-color: #e2e8f0;
+            color: #000000;
+        }
+        .dark body { 
+            background-color: #020617; 
+            color: #f8fafc;
+        }
+       .workspace-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex-grow: 1;
+        }
+        .ios-card {
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        .ios-input {
+            border-radius: 12px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: right;
+            width: 100%;
+        }
+        .ios-input:focus {
+            box-shadow: 0 0 0 3px rgba(58, 107, 104, 0.3);
+            border-color: #3A6B68;
+        }
+        .ios-button {
+            border-radius: 14px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ios-button:active { transform: scale(0.97); }
+        .logo-glow-container {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+        }
+        .dark .logo-glow-container { background: rgba(15, 23, 42, 0.35); }
+        .table-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 65vh;
+            border-radius: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: #3A6B68 #cbd5e1;
+        }
+        .dark .table-scroll-container { scrollbar-color: #3A6B68 #334155; }
+        .table-scroll-container::-webkit-scrollbar { width: 10px; height: 10px; }
+        .table-scroll-container::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 8px; }
+        .table-scroll-container::-webkit-scrollbar-thumb { background-color: #3A6B68; border-radius: 8px; border: 2px solid transparent; }
+        input, select, textarea, button { font-size: 13px !important; }
+
+        @keyframes blink-yellow {
+            0%, 100% { opacity: 1; background-color: #facc15; }
+            50% { opacity: 0.4; background-color: #eab308; }
+        }
+        .animate-blink-yellow {
+            animation: blink-yellow 0.8s infinite;
+        }
+
+        .grafana-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 4px 12px -2px rgba(0,0,0,0.08);
+            min-height: 165px;
+        }
+        .dark .grafana-card {
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+        }
+        .grafana-chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .grafana-val-container {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -40%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            pointer-events: none;
+            width: 100%;
+        }
+        .grafana-val-bracket {
+            font-size: 2rem;
+            font-weight: 300;
+            opacity: 0.7;
+            line-height: 1;
+        }
+        .grafana-val-number {
+            font-weight: 900;
+            font-size: 2.2rem;
+            line-height: 1;
+            font-family: monospace;
+        }
+        /* خلفية زرقاء فاتحة مع إطار مميز للإشعارات غير المقروءة */
+.notification-item.unread {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    border-right: 4px solid #3b82f6 !important;
+}
+.dark .notification-item.unread {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+    border-right: 4px solid #60a5fa !important;
+}
+    </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950 text-black dark:text-slate-100 text-right" dir="rtl">
+
+    <div id="topNotificationAlertBanner" class="hidden w-full bg-yellow-400 text-black font-black text-center py-3 px-4 shadow-xl z-50 sticky top-0 transition-all border-b-2 border-yellow-600 animate-blink-yellow flex justify-between items-center">
+        <div class="flex-1 flex justify-center items-center gap-2">
+            <span class="text-xl">🔔</span>
+            <span id="topNotificationAlertText" class="text-sm font-black">إشعار جديد: وصل طلب جديد للأنظمة</span>
+        </div>
+        <button onclick="dismissTopAlert()" class="bg-black/20 hover:bg-black/30 text-black px-3 py-1 rounded-lg text-xs font-bold" data-i18n="closeBtn">إغلاق ✕</button>
+    </div>
+
+    <div id="sidebarOverlay" onclick="closeSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+    
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-slate-100 dark:bg-slate-900 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl border-r border-slate-300 dark:border-slate-800 p-6 flex flex-col justify-between text-right">
+        <div id="sidebarMainView" class="space-y-6 overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-4">
+                <img src="Logo.png" alt="SANA Logo" class="h-8 object-contain">
+                <button onclick="closeSidebar()" class="text-slate-500 hover:text-black dark:hover:text-white text-xl font-bold">✕</button>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="navigateTo('home')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-800 transition text-[#3A6B68] dark:text-[#4B8581]">
+                    <span>🏠</span> <span data-i18n="navHome">الصفحة الرئيسية</span>
+                </button>
+                <button onclick="navigateTo('profile')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-800 transition text-black dark:text-slate-300">
+                    <span>👤</span> <span data-i18n="navProfile">حسابي</span>
+                </button>
+                <button onclick="switchSidebarView('settings')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-800 transition text-black dark:text-slate-300">
+                    <div class="flex items-center gap-3">
+                        <span class="p-1 rounded-md bg-yellow-400 text-slate-900 text-xs shadow-sm">🔔</span>
+                        <span data-i18n="navNotificationSettings">إعدادات الإشعارات</span>
+                    </div>
+                    <span class="text-xs">◀</span>
+                </button>
+            </nav>
+        </div>
+
+        <div id="sidebarSettingsView" class="hidden space-y-6 overflow-y-auto flex-col">
+            <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-3">
+                <button onclick="switchSidebarView('main')" class="text-xs font-bold text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-1">
+                    <span>▶</span> <span data-i18n="backBtn">رجوع</span>
+                </button>
+                <h4 class="text-xs font-black text-slate-800 dark:text-slate-200" data-i18n="navNotificationSettings">إعدادات الإشعارات</h4>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center py-4 border-b border-slate-300 dark:border-slate-800 space-y-2">
+                <div class="w-20 h-20 rounded-full bg-[#3A6B68]/10 flex items-center justify-center p-3 border-2 border-[#3A6B68]/30 shadow-md">
+                    <img src="Logo.png" alt="SANA Logo" class="w-full h-auto object-contain">
+                </div>
+                <span class="text-xs font-black text-[#3A6B68] dark:text-[#4B8581]" data-i18n="customAlerts">تخصيص تنبيهات SANA</span>
+            </div>
+
+            <div class="space-y-3 bg-white dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-300 dark:border-slate-700 text-xs">
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="font-bold text-slate-800 dark:text-slate-200" data-i18n="notifNewTickets">1. الطلبات الجديدة</span>
+                    <input type="checkbox" id="notifTypeNewTickets" checked onchange="saveNotificationSettings()" class="w-4 h-4 accent-[#3A6B68]">
+                </label>
+                <label class="flex items-center justify-between cursor-pointer border-t border-slate-200 dark:border-slate-700/50 pt-2.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-200" data-i18n="notifStatusUpdates">2. تحديثات وتغيير الحالة</span>
+                    <input type="checkbox" id="notifTypeStatusUpdates" checked onchange="saveNotificationSettings()" class="w-4 h-4 accent-[#3A6B68]">
+                </label>
+                <label class="flex items-center justify-between cursor-pointer border-t border-slate-200 dark:border-slate-700/50 pt-2.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-200" data-i18n="notifSlaAlerts">3. تنبيهات الـ SLA والنظام</span>
+                    <input type="checkbox" id="notifTypeSlaSystem" checked onchange="saveNotificationSettings()" class="w-4 h-4 accent-[#3A6B68]">
+                </label>
+            </div>
+        </div>
+
+        <button onclick="openLogoutModal()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 font-black text-sm rounded-xl border border-rose-500/25 transition mt-4">
+            <span>🚪</span> <span data-i18n="btnLogout">تسجيل الخروج</span>
+        </button>
+    </aside>
+
+    <main id="loginSection" class="w-full max-w-md mx-auto my-auto flex flex-col items-center py-12 px-4 space-y-6">
+        <div class="w-full flex justify-between items-center bg-white dark:bg-slate-900/80 p-3 px-5 ios-card border border-slate-300 dark:border-slate-800 shadow-sm">
+            <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                <span class="themeIcon">☀️</span>
+                <span class="themeText">الشمس</span>
+            </button>
+            <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                <span>🌐</span>
+                <span class="langText">English</span>
+            </button>
+        </div>
+        <div class="w-full flex justify-center">
+            <img src="Logo.png" alt="SANA Logo" class="w-48 h-auto object-contain">
+        </div>
+        <div class="ios-card bg-white dark:bg-slate-900/90 p-8 border border-slate-300 dark:border-slate-800 text-right shadow-xl">
+            <h1 data-i18n="portalTitle" class="text-2xl font-black text-center text-black dark:text-white mb-1">لوحة تحكم الباك أوفيس</h1>
+            <p data-i18n="portalSubtitle" class="text-xs text-center text-slate-600 dark:text-slate-400 mb-6">يرجى تسجيل الدخول لمتابعة الـ SLA والطلبات</p>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label data-i18n="lblEmail" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-right">البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" required placeholder="office@example.com" class="ios-input w-full p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-black dark:text-white text-sm font-semibold focus:outline-none">
+                </div>
+                <div>
+                    <label data-i18n="lblPassword" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-right">كلمة المرور</label>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" required placeholder="••••••••" class="ios-input w-full p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-black dark:text-white text-sm font-semibold focus:outline-none">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-sana focus:outline-none">
+                            <span id="passEyeIcon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" data-i18n="loginBtn" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white font-black py-4 text-base shadow-lg shadow-[#3A6B68]/30 transition mt-2">
+                    تسجيل الدخول
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <div id="mainAppWrapper" class="hidden flex-col min-h-screen justify-between">
+        <header class="w-full bg-white/95 dark:bg-slate-900/90 border-b border-slate-300 dark:border-slate-800 px-8 py-4 shadow-sm sticky top-0 z-30 backdrop-blur-md">
+            <div class="max-w-[2560px] mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-6">
+                    <div class="logo-glow-container px-4 py-2 border border-slate-300/60 dark:border-slate-800/50 shadow-sm flex items-center justify-center">
+                        <img src="Logo.png" alt="SANA Logo" class="h-10 object-contain filter drop-shadow">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3.5 py-2 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                            <span class="themeIcon">☀️</span>
+                            <span class="themeText">الشمس</span>
+                        </button>
+                        <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3.5 py-2 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+                            <span>🌐</span>
+                            <span class="langText">English</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button onclick="openNotificationsModal()" class="relative p-2.5 bg-slate-200 dark:bg-slate-800 rounded-xl text-black dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow-sm">
+                        <span class="text-lg">🔔</span>
+                        <span id="headerBellBadge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">0</span>
+                    </button>
+
+                    <div id="accountInfoBadge" class="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-[#3A6B68]/15 border border-[#3A6B68]/40 text-[#3A6B68] dark:text-[#4B8581] font-extrabold text-xs">
+                        <span id="headerAccountName" class="font-black text-sm">اسم المستخدم</span>
+                        <span class="opacity-50">|</span>
+                        <span id="headerAccountRole" class="font-bold">Office Engineer</span>
+                        <span class="opacity-50">|</span>
+                        <span id="sessionTimerBadge" class="font-mono bg-[#3A6B68] text-white px-2 py-0.5 rounded-lg text-[13px]">00:00:00</span>
+                    </div>
+
+                    <button onclick="openSidebar()" class="p-2.5 bg-slate-200 dark:bg-slate-800 rounded-xl text-black dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="workspace-container">
+            <div id="homeView" class="w-full space-y-6 text-right">
+                
+                <!-- قسم الجارتات الستة مرتبة 3 في كل سطر -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+                    
+                    <!-- السطر الأول -->
+                    <!-- 1. قيد المعالجة -->
+                    <div class="grafana-card">
+                        <span class="text-xs font-black text-purple-600 dark:text-purple-400" data-i18n="chartProcessing">قيد المعالجة</span>
+                        <div class="grafana-chart-wrapper">
+                            <canvas id="chartProcCanvas"></canvas>
+                            <div class="grafana-val-container text-purple-600 dark:text-purple-400">
+                                <span class="grafana-val-bracket">(</span>
+                                <span id="valChartProc" class="grafana-val-number">0</span>
+                                <span class="grafana-val-bracket">)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. قيد الانتظار / الجديدة -->
+                    <div class="grafana-card">
+                        <span class="text-xs font-black text-orange-600 dark:text-orange-400" data-i18n="chartPending">قيد الانتظار / جديدة</span>
+                        <div class="grafana-chart-wrapper">
+                            <canvas id="chartPendingCanvas"></canvas>
+                            <div class="grafana-val-container text-orange-600 dark:text-orange-400">
+                                <span class="grafana-val-bracket">(</span>
+                                <span id="valChartPending" class="grafana-val-number">0</span>
+                                <span class="grafana-val-bracket">)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. الكل (إجمالي الطلبات) -->
+                    <div class="grafana-card">
+                        <span class="text-xs font-black text-[#3A6B68] dark:text-[#4B8581]" data-i18n="chartTotal">الكل (إجمالي الطلبات)</span>
+                        <div class="grafana-chart-wrapper">
+                            <canvas id="chartTotalCanvas"></canvas>
+                            <div class="grafana-val-container text-[#3A6B68] dark:text-[#4B8581]">
+                                <span class="grafana-val-bracket">(</span>
+                                <span id="valChartTotal" class="grafana-val-number">0</span>
+                                <span class="grafana-val-bracket">)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- السطر الثاني -->
+                    <!-- 4. متوقفة -->
+                    <div class="grafana-card">
+                        <span class="text-xs font-black text-rose-600 dark:text-rose-400" data-i18n="chartStopped">متوقفة (Hold)</span>
+                        <div class="grafana-chart-wrapper">
+                            <canvas id="chartHoldCanvas"></canvas>
+                            <div class="grafana-val-container text-rose-600 dark:text-rose-400">
+                                <span class="grafana-val-bracket">(</span>
+                                <span id="valChartHold" class="grafana-val-number">0</span>
+                                <span class="grafana-val-bracket">)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. مكتملة -->
+                    <div class="grafana-card">
+                        <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">مكتملة</span>
+                        <div class="grafana-chart-wrapper">
+                            <canvas id="chartCompletedCanvas"></canvas>
+                            <div class="grafana-val-container text-emerald-600 dark:text-emerald-400">
+                                <span class="grafana-val-bracket">(</span>
+                                <span id="valChartCompleted" class="grafana-val-number">0</span>
+                                <span class="grafana-val-bracket">)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. ملغية -->
+                    <div class="grafana-card">
+                        <span class="text-xs font-black text-pink-600 dark:text-pink-400">ملغية</span>
+                        <div class="grafana-chart-wrapper">
+                            <canvas id="chartCanceledCanvas"></canvas>
+                            <div class="grafana-val-container text-pink-600 dark:text-pink-400">
+                                <span class="grafana-val-bracket">(</span>
+                                <span id="valChartCanceled" class="grafana-val-number">0</span>
+                                <span class="grafana-val-bracket">)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="ios-card bg-white dark:bg-slate-900/90 p-6 md:p-8 border border-slate-300 dark:border-slate-800 space-y-6 shadow-lg">
+                    
+                    <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-4">
+                        <div class="flex items-center gap-4">
+                            <h3 class="text-xl font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-2">
+                                <span>📋</span>
+                                <span data-i18n="ticketsTitle">الطلبات (Live محدث تلقائياً)</span>
+                            </h3>
+                            <div class="flex items-center gap-2 bg-[#3A6B68]/15 dark:bg-[#3A6B68]/20 border border-[#3A6B68]/30 px-8 py-1.5 rounded-2xl">
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-400" data-i18n="totalCount">إجمالي العدد:</span>
+                                <span id="totalTicketsCountBadge" class="text-2xl font-black text-[#3A6B68] dark:text-[#4B8581] font-mono">0</span>
+                            </div>
+                        </div>
+                        <!-- الجانب الأيسر: زر التصدير إلى إكسل -->
+    <button id="exportExcelBtn" onclick="exportTableToExcel()" class="bg-[#107c41] hover:bg-[#0e6b37] text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95">
+        <span>📊</span>
+        <span>EXPORT TO EXCEL</span>
+    </button>
+</div>
+                    </div>
+
+                    <button onclick="toggleSearchBox()" class="w-full py-3.5 px-6 rounded-2xl bg-[#3A6B68] hover:bg-[#2E5553] text-white font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 border border-[#3A6B68]/50">
+                        <span>🔍</span>
+                        <span data-i18n="searchBy">البحث بواسطة</span>
+                        <span id="searchToggleArrow" class="text-xs">▼</span>
+                    </button>
+
+                    <div id="collapsibleSearchSection" class="hidden bg-slate-100 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-300 dark:border-slate-800/80 space-y-3 transition-all">
+               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 items-end">
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="ticketNumLabel">🔢 رقم الطلب</label>
+        <input type="text" id="searchTicketNumInput" oninput="applyFilters()" placeholder="#00001" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <!-- مستطيل فلترة رقم البروسس الجديد -->
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">⚙️ رقم البروسس</label>
+        <input type="text" id="searchProcessNumInput" oninput="applyFilters()" placeholder="رقم البروسس" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="zoneNameLabel">📍 اسم الزون</label>
+        <input type="text" id="searchNameInput" oninput="applyFilters()" placeholder="اسم المنطقة أو العنوان" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <!-- مستطيل / قائمة فلترة المحافظة الجديدة -->
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">🏛️ المحافظة</label>
+        <input type="text" id="searchGovernorateInput" oninput="applyFilters()" placeholder="ابحث بالمحافظة" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="ticketTypeLabel">🏷️ نوع الطلب</label>
+        <input type="text" id="searchTypeInput" oninput="applyFilters()" placeholder="نوع الطلب" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="senderLabel">👤 المرسل</label>
+        <input type="text" id="searchSenderInput" oninput="applyFilters()" placeholder="صاحب الحساب المرسل" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="assigneeLabel">👨‍💼 الأوفيس المستلم</label>
+        <input type="text" id="searchAssigneeInput" oninput="applyFilters()" placeholder="الحساب المستلم" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+    </div>
+    <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="statusLabel">📌 حالة الطلب</label>
+        <select id="searchStatusSelect" onchange="applyFilters()" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
+            <option value="ALL" data-i18n="optAll">الكل</option>
+            <option value="جديد" data-i18n="optNew">جديد</option>
+            <option value="قيد المعالجة" data-i18n="optInProc">قيد المعالجة</option>
+            <option value="معلق" data-i18n="optHold">متوقفة (Hold)</option>
+            <option value="يحتاج تعديل" data-i18n="optNeedsUpdate">يحتاج تعديل</option>
+            <option value="مكتملة" data-i18n="optCompleted">مكتملة</option>
+            <option value="ملغي" data-i18n="optCanceled">ملغي</option>
+        </select>
+    </div>
+</div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 items-end">
+                            <div>
+                                <label class="block text-[11px] font-bold text-[#3A6B68] dark:text-[#4B8581] mb-1">⚡ خيارات بحث سريعة</label>
+                                <select id="quickDateFilterSelect" onchange="applyQuickDateFilter(this.value)" class="ios-input p-2.5 bg-white dark:bg-slate-800 border-2 border-[#3A6B68]/40 text-xs font-bold text-black dark:text-white focus:outline-none cursor-pointer">
+                                    <option value="ALL">الكل</option>
+                                    <option value="TODAY">اليوم</option>
+                                    <option value="24H">آخر 24 ساعة</option>
+                                    <option value="48H">آخر 48 ساعة</option>
+                                    <option value="WEEK">آخر أسبوع</option>
+                                    <option value="MONTH">آخر شهر</option>
+                                    <option value="3MONTHS">آخر 3 شهور</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="dateFromLabel">📅 من (تاريخ ووقت)</label>
+                                <input type="datetime-local" id="dateTimeFromInput" onclick="this.showPicker()" onchange="applyFilters()" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="dateToLabel">📅 إلى (تاريخ ووقت)</label>
+                                <input type="datetime-local" id="dateTimeToInput" onclick="this.showPicker()" onchange="applyFilters()" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll-container border border-slate-300 dark:border-slate-800 shadow-inner">
+                  <table class="w-full text-right border-collapse text-xs md:text-sm min-w-[1400px]">
+    <thead class="sticky top-0 z-20">
+   <tr class="bg-[#3A6B68] text-white font-bold shadow">
+    <!-- 1. رقم الطلب -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thTicketNum">1. رقم الطلب</span>
+            <select onchange="sortTable('ticket_number', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 2. تاريخ الإنشاء -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span>2. تاريخ الإنشاء</span>
+            <select onchange="sortTable('created_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 3. المرسل -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thSender">3. المرسل</span>
+            <select onchange="sortTable('sender_name', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 4. نوع الطلب -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thType">4. نوع الطلب</span>
+            <select onchange="sortTable('ticket_type', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 5. رقم البروسس -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thProcessNum">5. رقم البروسس</span>
+            <select onchange="sortTable('process_number', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 6. عنوان الزون -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thZoneAddress">6. عنوان الزون</span>
+            <select onchange="sortTable('zone_address', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 7. المحافظة -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span>7. المحافظة</span>
+            <select onchange="sortTable('governorate', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 8. وقت SLA / التاريخ -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thSlaTime">8. وقت SLA / التاريخ</span>
+            <select onchange="sortTable('due_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 9. حالة الطلب -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span data-i18n="thStatus">9. حالة الطلب</span>
+            <select onchange="sortTable('status', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 10. آخر تحديث -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span>10. آخر تحديث</span>
+            <select onchange="sortTable('updated_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 11. الموظف المستقبل (أول أكشن أوفيس ثابت) -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span>11. الموظف المستقبل</span>
+            <select onchange="sortTable('office_first_receiver', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+
+    <!-- 12. اسم الحساب المنجز/صاحب آخر أكشن -->
+    <th class="p-3 text-right">
+        <div class="flex flex-col gap-1">
+            <span>12. الحساب المنجز (آخر أكشن)</span>
+            <select onchange="sortTable('office_last_action_user', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+            </select>
+        </div>
+    </th>
+</tr>
+</thead>
+    <tbody id="ticketsTableBody" class="divide-y divide-slate-300 dark:divide-slate-800 bg-white/70 dark:bg-slate-900/50">
+        <tr><td colspan="10" class="p-6 text-center text-slate-500 font-bold" data-i18n="loadingData">جاري تحميل البيانات بالوقت الحقيقي...</td></tr>
+    </tbody>
+</table>
+<!-- حاوية أسفل الجدول لتثبيت الزر جهة اليسار -->
+
+                    </div>
+                </div>
+            </div>
+
+            <div id="profileView" class="hidden w-full max-w-4xl mx-auto space-y-6 text-right">
+                <div class="ios-card bg-white dark:bg-slate-900/90 p-8 border border-slate-300 dark:border-slate-800 space-y-6 shadow-xl">
+                    <h2 class="text-xl font-black text-[#3A6B68] dark:text-[#4B8581] border-b border-slate-300 dark:border-slate-800 pb-4" data-i18n="profileHeader">👤 معلومات الحساب الشخصي</h2>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="fullName">الاسم الكامل</label>
+                        <div id="profileFullName" class="ios-input p-3.5 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center"></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="jobTitle">العنوان الوظيفي</label>
+                            <div id="profileJobTitle" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblDirectManager">المدير المباشر</label>
+                            <div id="profileManager" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="governorate">المحافظة</label>
+                            <div id="profileGovernorate" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblPhone">رقم الهاتف</label>
+                            <div id="profilePhone" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200 font-mono"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblCompleted">الطلبات المنجزة</label>
+                            <div id="profileCompletedCount" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-emerald-600 dark:text-emerald-400">0 مكتملة</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblSent">الطلبات المرسلة</label>
+                            <div id="profileTotalSent" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200">0 طلب</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblGender">الجنس</label>
+                            <div id="profileGender" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200">-</div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblEmail">البريد الإلكتروني</label>
+                            <div id="profileEmail" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200 font-mono"></div>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button onclick="openChangePasswordModal()" class="w-full ios-button bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 text-center shadow-lg transition flex items-center justify-center gap-2">
+                            <span>🔑</span> <span data-i18n="btnChangePass">تغيير الرمز السري</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center text-xs text-slate-600 dark:text-slate-500 py-6 border-t border-slate-300 dark:border-slate-900">
+            © 2026 SANA. All rights reserved.
+        </footer>
+    </div>
+
+    <div id="notificationsTopBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl transition-all duration-300 transform -translate-y-full opacity-0 pointer-events-none">
+        <div class="ios-card bg-white/95 dark:bg-slate-900/95 p-5 border border-slate-300 dark:border-slate-800 space-y-3 shadow-2xl backdrop-blur-xl rounded-3xl">
+            <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2 text-[#3A6B68] dark:text-[#4B8581] font-black text-sm">
+                    <span>🔔</span> <span data-i18n="notifCenterTitle">مركز الإشعارات والتنبيهات</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="clearNotifications()" class="text-[11px] font-bold text-rose-600 hover:underline" data-i18n="btnClearAll">مسح الكل</button>
+                    <button onclick="closeNotificationsModal()" class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
+                </div>
+            </div>
+            
+            <div id="notificationsList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <div class="p-4 text-center text-xs text-slate-500" data-i18n="noNotifications">لا توجد إشعارات جديدة حالياً</div>
+            </div>
+        </div>
+    </div>
+
+<div id="userProfileModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden text-right">        <div class="ios-card bg-white dark:bg-slate-900 p-8 rounded-3xl max-w-md w-full border border-slate-300 dark:border-slate-800 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-black dark:text-slate-100 flex items-center gap-2"><span>👤</span> <span data-i18n="userFullDetails">تفاصيل الحساب الكاملة</span></h3>
+                <button onclick="closeUserProfileModal()" class="text-slate-500 hover:text-black dark:hover:text-white text-lg font-bold">✕</button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="fullName">الاسم الكامل</label>
+                    <div id="modalProfileName" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-[#3A6B68] dark:text-[#4B8581]">-</div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="jobTitle">العنوان الوظيفي</label>
+                        <div id="modalProfileJob" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200">-</div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="lblDirectManager">المدير المباشر</label>
+                        <div id="modalProfileManager" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200">-</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="governorate">المحافظة</label>
+                        <div id="modalProfileGov" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200">-</div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="lblPhone">رقم الهاتف</label>
+                        <div id="modalProfilePhone" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200 font-mono">-</div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="lblEmail">البريد الإلكتروني</label>
+                    <div id="modalProfileEmail" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200 font-mono truncate">-</div>
+                </div>
+            </div>
+            <div class="pt-2">
+                <button onclick="closeUserProfileModal()" class="ios-button w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-3" data-i18n="closeBtn">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal: تفاصيل الطلب الكاملة -->
+    <div id="ticketDetailModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right overflow-y-auto">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl max-w-2xl w-full border border-slate-300 dark:border-slate-800 space-y-5 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-2">
+                    <span>📋</span> <span data-i18n="fullTicketDetails">تفاصيل الطلب الكاملة</span> (<span id="modalTicketNumDisplay">#00001</span>)
+                </h3>
+                <button onclick="closeTicketDetailModal()" class="text-slate-500 hover:text-black dark:hover:text-white text-lg font-bold">✕</button>
+            </div>
+
+            <input type="hidden" id="activeTicketId">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="thType">نوع الطلب</label>
+                    <div id="dtModalType" class="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-black dark:text-slate-200">-</div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">رقم الزون</label>
+                    <div id="dtModalZoneNumber" class="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-mono font-bold text-black dark:text-slate-200">-</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="thProcessNum">رقم البروسس (Process)</label>
+                    <input type="text" id="dtModalProcess" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono font-bold text-black dark:text-white" placeholder="24 أو 67">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="governorate">المحافظة</label>
+                    <div id="dtModalGovernorate" class="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-black dark:text-slate-200">-</div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">ملاحظة الفيلد (Field Note)</label>
+                <div id="dtModalFieldNotes" class="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-300 min-h-[48px] whitespace-pre-line text-xs">
+                    -
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400" data-i18n="attachFiles">إرفاق الملفات (Drag & Drop أو تصفح)</label>
+                <div id="dropZone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#3A6B68] rounded-2xl p-6 text-center bg-slate-100/50 dark:bg-slate-800/40 transition cursor-pointer flex flex-col items-center justify-center gap-2">
+                    <span class="text-2xl">📁</span>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300" data-i18n="dragFiles">اسحب الملفات هنا أو اضغط للتصفح والرفع</span>
+                    <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(this.files[0])">
+                    <span id="selectedFileName" class="text-[11px] text-[#3A6B68] font-bold"></span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="addComment">إضافة تعليق / إجراء جديد</label>
+                <textarea id="dtModalNotes" rows="2" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-black dark:text-slate-100" placeholder="اكتب ملاحظاتك وتفاصيل الحدث الجديد هنا..."></textarea>
+            </div>
+
+            <div class="border-t border-slate-300 dark:border-slate-800 pt-3">
+                <label class="block text-xs font-bold text-[#3A6B68] dark:text-[#4B8581] mb-2" data-i18n="historyLogHeader">📜 سجل التغييرات والأحداث السابقة (الأحدث في الأعلى)</label>
+                <div id="historyLogsContainer" class="p-3 bg-slate-200 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 rounded-2xl space-y-2 max-h-48 overflow-y-auto text-xs">
+                    <div class="text-slate-500 text-center" data-i18n="noLogs">لا توجد سجلات بعد.</div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1.5 text-xs" data-i18n="thStatus">تغيير حالة الطلب</label>
+                <select id="dtModalStatus" class="ios-input w-full p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-black dark:text-slate-200 rounded-xl focus:outline-none cursor-pointer">
+                    <option value="جديد" id="optNewStatusOption" data-i18n="optNew">جديد</option>
+                    <option value="قيد المعالجة" data-i18n="optInProc">قيد المعالجة</option>
+                    <option value="معلق" data-i18n="optHold">متوقفة (Hold)</option>
+                    <option value="يحتاج تعديل" data-i18n="optNeedsUpdate">يحتاج تعديل</option>
+                    <option value="مكتملة" data-i18n="optCompleted">مكتملة</option>
+                    <option value="ملغي" data-i18n="optCanceled">ملغي</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="saveAndSendTicketUpdate()" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-bold py-3.5 shadow-lg" data-i18n="btnSaveSend">حفظ التغييرات وإرسال الطلب للفيلد</button>
+                <button onclick="closeTicketDetailModal()" class="ios-button flex-1 bg-slate-300 dark:bg-slate-800 hover:bg-slate-400 text-black dark:text-slate-300 text-xs font-bold py-3.5" data-i18n="cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="logoutModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-8 rounded-3xl max-w-sm w-full border border-slate-300 dark:border-slate-800 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-xl">⚠️</div>
+            <h3 class="text-base font-bold text-black dark:text-white" data-i18n="confirmLogoutTitle">تأكيد تسجيل الخروج</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400" data-i18n="confirmLogoutDesc">هل أنت متأكد من أنك تريد الخروج من الحساب الآن؟</p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="confirmLogout()" class="ios-button flex-1 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold py-3.5" data-i18n="yesLogout">نعم، خروج</button>
+                <button onclick="closeLogoutModal()" class="ios-button flex-1 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 text-xs font-bold py-3.5" data-i18n="cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-8 rounded-3xl max-w-md w-full border border-slate-300 dark:border-slate-800 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-black dark:text-slate-100" data-i18n="btnChangePass">🔒 تغيير الرمز السري</h3>
+                <button onclick="closeChangePasswordModal()" class="text-slate-500 hover:text-black dark:hover:text-white">✕</button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="lblNewPass">كلمة المرور الجديدة</label>
+                    <input type="password" id="newPasswordInput" placeholder="••••••••" class="ios-input w-full p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-black dark:text-slate-100">
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="submitNewPassword()" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-bold py-3.5" data-i18n="btnSave">حفظ التغيير</button>
+                <button onclick="closeChangePasswordModal()" class="ios-button flex-1 bg-slate-300 dark:bg-slate-800 text-black dark:text-slate-300 text-xs font-bold py-3.5" data-i18n="cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://xliwjzykrtlbujqkmqke.supabase.co/';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ZKkCIsG9ln0xiYLbR8EQlA_wUhdEP_L';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let sharedAudioContext = null;
+
+        document.addEventListener('click', function initAudioEngine() {
+            if (!sharedAudioContext) {
+                sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (sharedAudioContext.state === 'suspended') {
+                sharedAudioContext.resume();
+            }
+        }, { once: true });
+
+        const translations = {
+            ar: {
+                navHome: "الصفحة الرئيسية", navProfile: "حسابي", navNotificationSettings: "إعدادات الإشعارات", btnLogout: "تسجيل الخروج",
+                portalTitle: "لوحة تحكم الباك أوفيس", portalSubtitle: "يرجى تسجيل الدخول لمتابعة الـ SLA والطلبات",
+                lblEmail: "البريد الإلكتروني", lblPassword: "كلمة المرور", loginBtn: "تسجيل الدخول", ticketsTitle: "الطلبات (Live محدث تلقائياً)",
+                searchBy: "البحث بواسطة", fullName: "الاسم الكامل", jobTitle: "العنوان الوظيفي", governorate: "المحافظة", lblPhone: "رقم الهاتف", 
+                lblDirectManager: "المدير المباشر", confirmLogoutTitle: "تأكيد تسجيل الخروج", confirmLogoutDesc: "هل أنت متأكد من أنك تريد الخروج من الحساب الآن؟", 
+                yesLogout: "نعم، خروج", cancel: "إلغاء", totalCount: "إجمالي العدد:", closeBtn: "إغلاق ✕", backBtn: "رجوع", customAlerts: "تخصيص تنبيهات SANA",
+                notifNewTickets: "1. الطلبات الجديدة", notifStatusUpdates: "2. تحديثات وتغيير الحالة", notifSlaAlerts: "3. تنبيهات الـ SLA والنظام",
+                ticketNumLabel: "🔢 رقم الطلب", zoneNameLabel: "📍 اسم الزون", ticketTypeLabel: "🏷️ نوع الطلب", senderLabel: "👤 المرسل", assigneeLabel: "👨‍💼 الأوفيس المستلم", statusLabel: "📌 حالة الطلب",
+                optAll: "الكل", optNew: "جديد", optInProc: "قيد المعالجة", optHold: "متوقفة (Hold)", optNeedsUpdate: "يحتاج تعديل", optCompleted: "مكتملة",
+                dateFromLabel: "📅 من (تاريخ ووقت)", dateToLabel: "📅 إلى (تاريخ ووقت)", chartPending: "قيد الانتظار / الجديدة", chartProcessing: "قيد المعالجة", chartNeedsUpdate: "تحتاج تحديث",
+                chartStopped: "المتوقفة", chartTotal: "إجمالي الطلبات", thTicketNum: "1. رقم الطلب", thSender: "2. المرسل", thType: "3. نوع الطلب", thProcessNum: "4. رقم البروسس",
+                thZoneAddress: "5. عنوان الزون", thSlaTime: "6. وقت SLA / التاريخ", thStatus: "7. حالة الطلب", thClaimUser: "8. الموظف الحاجز (Claim)",
+                sortLabel: "الترتيب", sortAZ: "a-z", sortZA: "z-a", sortNewest: "من الأحدث للأقدم", sortOldest: "من الأقدم للأحدث", loadingData: "جاري تحميل البيانات بالوقت الحقيقي...",
+                profileHeader: "👤 معلومات الحساب الشخصي", lblCompleted: "الطلبات المنجزة", lblSent: "الطلبات المرسلة", lblGender: "الجنس", btnChangePass: "تغيير الرمز السري",
+                notifCenterTitle: "مركز الإشعارات والتنبيهات", btnClearAll: "مسح الكل", noNotifications: "لا توجد إشعارات جديدة حالياً", userFullDetails: "تفاصيل الحساب الكاملة", fullTicketDetails: "تفاصيل الطلب الكاملة",
+                attachFiles: "إرفاق الملفات (Drag & Drop أو تصفح)", dragFiles: "اسحب الملفات هنا أو اضغط للتصفح والرفع", addComment: "إضافة تعليق / إجراء جديد", historyLogHeader: "📜 سجل التغييرات والأحداث السابقة (الأحدث في الأعلى)",
+                noLogs: "لا توجد سجلات بعد.", btnSaveSend: "حفظ التغييرات وإرسال الطلب للفيلد", lblNewPass: "كلمة المرور الجديدة", btnSave: "حفظ التغيير", unassignedClaim: "غير محجوز"
+            },
+            en: {
+                navHome: "Home Page", navProfile: "My Profile", navNotificationSettings: "Notification Settings", btnLogout: "Logout",
+                portalTitle: "Back-Office Dashboard", portalSubtitle: "Please sign in to track SLA and tickets",
+                lblEmail: "Email Address", lblPassword: "Password", loginBtn: "Sign In", ticketsTitle: "Tickets (Live Auto-Updated)",
+                searchBy: "Search By", fullName: "Full Name", jobTitle: "Job Title", governorate: "Governorate", lblPhone: "Phone Number", 
+                lblDirectManager: "Direct Manager", confirmLogoutTitle: "Confirm Logout", confirmLogoutDesc: "Are you sure you want to log out right now?", 
+                yesLogout: "Yes, Logout", cancel: "Cancel", totalCount: "Total Count:", closeBtn: "Close ✕", backBtn: "Back", customAlerts: "SANA Notification Setup",
+                notifNewTickets: "1. New Tickets", notifStatusUpdates: "2. Status & Updates", notifSlaAlerts: "3. SLA & System Alerts",
+                ticketNumLabel: "🔢 Ticket No.", zoneNameLabel: "📍 Zone Name", ticketTypeLabel: "🏷️ Ticket Type", senderLabel: "👤 Sender", assigneeLabel: "👨‍💼 Assigned Office", statusLabel: "📌 Status",
+                optAll: "All", optNew: "New", optInProc: "Processing", optHold: "Hold", optNeedsUpdate: "Needs Update", optCompleted: "Completed",
+                dateFromLabel: "📅 From (Date & Time)", dateToLabel: "📅 To (Date & Time)", chartPending: "Pending / New", chartProcessing: "In Processing", chartNeedsUpdate: "Needs Update",
+                chartStopped: "Stopped / Hold", chartTotal: "Total Tickets", thTicketNum: "1. Ticket No.", thSender: "2. Sender", thType: "3. Ticket Type", thProcessNum: "4. Process No.",
+                thZoneAddress: "5. Zone Address", thSlaTime: "6. SLA Time / Date", thStatus: "7. Status", thClaimUser: "8. Claimed By",
+                sortLabel: "Sort", sortAZ: "a-z", sortZA: "z-a", sortNewest: "Newest to Oldest", sortOldest: "Oldest to Newest", loadingData: "Loading real-time data...",
+                profileHeader: "👤 Personal Account Info", lblCompleted: "Completed Tickets", lblSent: "Sent Tickets", lblGender: "Gender", btnChangePass: "Change Password",
+                notifCenterTitle: "Notification Center", btnClearAll: "Clear All", noNotifications: "No new notifications currently", userFullDetails: "Full User Details", fullTicketDetails: "Full Ticket Details",
+                attachFiles: "Attach Files (Drag & Drop or Browse)", dragFiles: "Drag & drop files here or click to browse", addComment: "Add Comment / Action", historyLogHeader: "📜 Change History (Newest First)",
+                noLogs: "No history logs yet.", btnSaveSend: "Save Changes & Send to Field", lblNewPass: "New Password", btnSave: "Save Changes", unassignedClaim: "Unassigned"
+            }
+        };
+
+        let currentLang = 'ar';
+        let allFetchedTickets = [];
+        let displayedTickets = [];
+        let notificationsList = [];
+        let currentSortColumn = null;
+        let currentSortDirection = 'default';
+
+        let sessionStartTime = new Date();
+        let sessionTimerInterval = null;
+
+        let notificationSettings = { newTickets: true, statusUpdates: true, slaSystem: true };
+        let currentUserProfile = { id: '', name: '', role: 'Office Engineer', email: '', manager: '-', phone: '-', governorate: '-', gender: 'Male', completedCount: 0, totalSent: 0 };
+
+        let chartInstances = {};
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            loadStoredNotifications();
+            loadNotificationSettings();
+            startSessionTimer();
+            initGrafanaCharts();
+
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
+                if (session && session.user) {
+                    const user = session.user;
+                    currentUserProfile.id = user.id;
+                    const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                    if (profileData) {
+                        currentUserProfile.name = profileData.full_name || user.email.split('@')[0];
+                        currentUserProfile.email = user.email;
+                        currentUserProfile.role = profileData.job_title || 'Office Engineer';
+                        currentUserProfile.governorate = profileData.governorate || '-';
+                        currentUserProfile.phone = profileData.phone || '-';
+                        currentUserProfile.manager = profileData.direct_manager || '-';
+                        currentUserProfile.gender = profileData.gender || 'Male';
+                    } else {
+                        currentUserProfile.name = user.email.split('@')[0];
+                        currentUserProfile.email = user.email;
+                    }
+                    setupOfficeHeaderInfo();
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainAppWrapper').classList.remove('hidden');
+                    document.getElementById('mainAppWrapper').style.display = 'flex';
+                    navigateTo('home');
+                }
+            } catch (err) { console.error('Session restore error:', err.message); }
+        });
+
+        function initGrafanaCharts() {
+            const chartConfigs = [
+                { id: 'chartProcCanvas', valId: 'valChartProc', color: '#9333ea' },
+                { id: 'chartPendingCanvas', valId: 'valChartPending', color: '#ea580c' },
+                { id: 'chartTotalCanvas', valId: 'valChartTotal', color: '#3A6B68' },
+                { id: 'chartHoldCanvas', valId: 'valChartHold', color: '#f43f5e' },
+                { id: 'chartCompletedCanvas', valId: 'valChartCompleted', color: '#059669' },
+                { id: 'chartCanceledCanvas', valId: 'valChartCanceled', color: '#ec4899' }
+            ];
+
+            chartConfigs.forEach(cfg => {
+                const elem = document.getElementById(cfg.id);
+                if (!elem) return;
+                const ctx = elem.getContext('2d');
+                chartInstances[cfg.id] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [0, 100],
+                            backgroundColor: [cfg.color, '#33415520'],
+                            borderWidth: 0,
+                            borderRadius: 10
+                        }]
+                    },
+                    options: {
+                        rotation: -90,
+                        circumference: 180,
+                        cutout: '80%',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                    }
+                });
+            });
+        }
+
+       function updateGrafanaCharts(tickets) {
+            const total = tickets.length;
+            const pending = tickets.filter(t => (t.status === 'جديد' || t.status === 'New' || !t.status)).length;
+            const proc = tickets.filter(t => (t.status === 'قيد المعالجة' || t.status === 'Processing')).length;
+            const hold = tickets.filter(t => (t.status === 'معلق' || t.status === 'Hold')).length;
+            const completed = tickets.filter(t => (t.status === 'مكتملة' || t.status === 'مكتمل' || t.status === 'Completed')).length;
+            const canceled = tickets.filter(t => (t.status === 'ملغي' || t.status === 'Canceled')).length;
+
+            const updateGauge = (chartId, valId, count) => {
+                if (!document.getElementById(valId)) return;
+                document.getElementById(valId).innerText = count;
+                const chart = chartInstances[chartId];
+                if (chart) {
+                    const ratio = total > 0 ? (count / total) * 100 : 0;
+                    const fillVal = total > 0 ? Math.max(ratio, 5) : 0; 
+                    chart.data.datasets[0].data = [fillVal, 100 - fillVal];
+                    chart.update();
+                }
+            };
+
+            updateGauge('chartProcCanvas', 'valChartProc', proc);
+            updateGauge('chartPendingCanvas', 'valChartPending', pending);
+            updateGauge('chartTotalCanvas', 'valChartTotal', total);
+            updateGauge('chartHoldCanvas', 'valChartHold', hold);
+            updateGauge('chartCompletedCanvas', 'valChartCompleted', completed);
+            updateGauge('chartCanceledCanvas', 'valChartCanceled', canceled);
+        }
+
+        function applyQuickDateFilter(option) {
+            const fromInput = document.getElementById('dateTimeFromInput');
+            const toInput = document.getElementById('dateTimeToInput');
+            
+            if (option === 'ALL') {
+                fromInput.value = '';
+                toInput.value = '';
+                applyFilters();
+                return;
+            }
+
+            const now = new Date();
+            let fromDate = new Date();
+
+            if (option === 'TODAY') {
+                fromDate.setHours(0, 0, 0, 0);
+            } else if (option === '24H') {
+                fromDate.setHours(now.getHours() - 24);
+            } else if (option === '48H') {
+                fromDate.setHours(now.getHours() - 48);
+            } else if (option === 'WEEK') {
+                fromDate.setDate(now.getDate() - 7);
+            } else if (option === 'MONTH') {
+                fromDate.setMonth(now.getMonth() - 1);
+            } else if (option === '3MONTHS') {
+                fromDate.setMonth(now.getMonth() - 3);
+            }
+
+            const formatDate = (d) => {
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+
+            fromInput.value = formatDate(fromDate);
+            toInput.value = formatDate(now);
+            applyFilters();
+        }
+
+      // ==========================================
+// آلية حساب وقت تواجد الموظف اليومي (لا تتصفر بالـ Refresh)
+// ==========================================
+
+function getTodayKey() {
+    const today = new Date();
+    // إرجاع تاريخ اليوم بصيغة YYYY-MM-DD لتمييز كل يوم عن الآخر
+    return `user_active_seconds_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+}
+
+function startSessionTimer() {
+    const todayKey = getTodayKey();
+    
+    // 1. تنظيف البيانات السابقة للأيام القديمة لحفظ مساحة التخزين المحلية
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('user_active_seconds_') && key !== todayKey) {
+            localStorage.removeItem(key);
+        }
+    }
+
+    // 2. قراءة الثواني المجمعة مسبقاً لهذا اليوم، وإن لم تكن موجودة تبدأ من 0
+    let totalSecondsToday = parseInt(localStorage.getItem(todayKey)) || 0;
+
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+
+    sessionTimerInterval = setInterval(() => {
+        // التحقق مما إذا عبرت الساعة 11:59 مساءً ودخل يوم جديد أثناء فتح الصفحة
+        const currentTodayKey = getTodayKey();
+        if (currentTodayKey !== todayKey) {
+            // إعادة استدعاء العداد ليبدأ من صفر لليوم الجديد
+            startSessionTimer();
+            return;
+        }
+
+        // زيادة ثانية وتحديث التخزين الداخلي
+        totalSecondsToday++;
+        localStorage.setItem(todayKey, totalSecondsToday);
+
+        // تحويل الثواني إلى ثواني، دقائق، وساعات
+        const hrs = String(Math.floor(totalSecondsToday / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((totalSecondsToday % 3600) / 60)).padStart(2, '0');
+        const secs = String(totalSecondsToday % 60).padStart(2, '0');
+
+        // تحديث العنصر في الهيدر
+        const timerElem = document.getElementById('sessionTimerBadge');
+        if (timerElem) {
+            timerElem.innerText = `${hrs}:${mins}:${secs}`;
+        }
+    }, 1000);
+}
+
+        function switchSidebarView(view) {
+            const mainView = document.getElementById('sidebarMainView');
+            const settingsView = document.getElementById('sidebarSettingsView');
+            if (view === 'settings') {
+                mainView.classList.add('hidden');
+                settingsView.classList.remove('hidden');
+                settingsView.classList.add('flex');
+            } else {
+                settingsView.classList.add('hidden');
+                settingsView.classList.remove('flex');
+                mainView.classList.remove('hidden');
+            }
+        }
+
+        function toggleSearchBox() {
+            const box = document.getElementById('collapsibleSearchSection');
+            const arrow = document.getElementById('searchToggleArrow');
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                arrow.innerText = '▲';
+            } else {
+                box.classList.add('hidden');
+                arrow.innerText = '▼';
+            }
+        }
+
+        function playIphoneNotificationSound() {
+            try {
+                if (!sharedAudioContext) {
+                    sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (sharedAudioContext.state === 'suspended') {
+                    sharedAudioContext.resume();
+                }
+                const audioCtx = sharedAudioContext;
+                const now = audioCtx.currentTime;
+
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1046.50, now);
+                gain1.gain.setValueAtTime(0.3, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.15);
+
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(1318.51, now + 0.12);
+                gain2.gain.setValueAtTime(0.4, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(now + 0.12);
+                osc2.stop(now + 0.35);
+            } catch(e) { console.log('Audio playback sound error', e); }
+        }
+
+        function loadStoredNotifications() {
+            const saved = localStorage.getItem('sana_notifications_list');
+            if (saved) {
+                try {
+                    notificationsList = JSON.parse(saved);
+                    updateNotificationsUI();
+                } catch(e) {}
+            }
+        }
+
+        function saveNotificationsToStorage() {
+            localStorage.setItem('sana_notifications_list', JSON.stringify(notificationsList));
+        }
+
+        function loadNotificationSettings() {
+            const saved = localStorage.getItem('sana_notif_settings');
+            if (saved) {
+                try {
+                    notificationSettings = JSON.parse(saved);
+                    document.getElementById('notifTypeNewTickets').checked = notificationSettings.newTickets;
+                    document.getElementById('notifTypeStatusUpdates').checked = notificationSettings.statusUpdates;
+                    document.getElementById('notifTypeSlaSystem').checked = notificationSettings.slaSystem;
+                } catch(e) {}
+            }
+        }
+
+        function saveNotificationSettings() {
+            notificationSettings = {
+                newTickets: document.getElementById('notifTypeNewTickets').checked,
+                statusUpdates: document.getElementById('notifTypeStatusUpdates').checked,
+                slaSystem: document.getElementById('notifTypeSlaSystem').checked
+            };
+            localStorage.setItem('sana_notif_settings', JSON.stringify(notificationSettings));
+        }
+
+        function setupOfficeHeaderInfo() {
+            document.getElementById('accountInfoBadge').classList.remove('hidden');
+            document.getElementById('headerAccountName').innerText = currentUserProfile.name;
+            document.getElementById('headerAccountRole').innerText = currentUserProfile.role;
+        }
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            
+            document.querySelectorAll('.langText').forEach(el => { el.innerText = (currentLang === 'ar') ? 'English' : 'العربية'; });
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (translations[currentLang][key]) elem.innerText = translations[currentLang][key];
+            });
+            applyFilters();
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.querySelectorAll('.themeIcon').forEach(el => { el.innerText = isDark ? '☀️' : '🌙'; });
+            document.querySelectorAll('.themeText').forEach(el => {
+                el.innerText = isDark ? ((currentLang === 'ar') ? 'الشمس' : 'Light') : ((currentLang === 'ar') ? 'الظلام' : 'Dark');
+            });
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                
+                const user = data.user;
+                currentUserProfile.id = user.id;
+                currentUserProfile.email = user.email;
+
+                const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                if (profileData) {
+                    currentUserProfile.name = profileData.full_name || user.email.split('@')[0];
+                    currentUserProfile.role = profileData.job_title || 'Office Engineer';
+                    currentUserProfile.governorate = profileData.governorate || '-';
+                    currentUserProfile.phone = profileData.phone || '-';
+                    currentUserProfile.manager = profileData.direct_manager || '-';
+                    currentUserProfile.gender = profileData.gender || 'Male';
+                } else {
+                    currentUserProfile.name = user.email.split('@')[0];
+                }
+
+                setupOfficeHeaderInfo();
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('mainAppWrapper').classList.remove('hidden');
+                document.getElementById('mainAppWrapper').style.display = 'flex';
+                navigateTo('home');
+            } catch (err) {
+                alert('خطأ في تسجيل الدخول: ' + err.message);
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('loginPassword');
+            const eye = document.getElementById('passEyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.innerText = '🙈';
+            } else {
+                input.type = 'password';
+                eye.innerText = '👁️';
+            }
+        }
+
+        async function loadUserProfileData() {
+            const { data: tickets } = await supabaseClient.from('tickets').select('*');
+            if (tickets) {
+                currentUserProfile.totalSent = tickets.length;
+                currentUserProfile.completedCount = tickets.filter(t => t.status === 'مكتملة' || t.status === 'مكتمل').length;
+            }
+            document.getElementById('profileFullName').innerText = currentUserProfile.name || '-';
+            document.getElementById('profileJobTitle').innerText = currentUserProfile.role || '-';
+            document.getElementById('profileManager').innerText = currentUserProfile.manager || '-';
+            document.getElementById('profileGovernorate').innerText = currentUserProfile.governorate || '-';
+            document.getElementById('profilePhone').innerText = currentUserProfile.phone || '-';
+            document.getElementById('profileEmail').innerText = currentUserProfile.email || '-';
+            document.getElementById('profileGender').innerText = currentUserProfile.gender || 'Male';
+            document.getElementById('profileCompletedCount').innerText = `${currentUserProfile.completedCount} مكتملة`;
+            document.getElementById('profileTotalSent').innerText = `${currentUserProfile.totalSent} طلب`;
+        }
+
+        function openNotificationsModal() {
+            closeSidebar();
+            const banner = document.getElementById('notificationsTopBanner');
+            banner.classList.remove('pointer-events-none', '-translate-y-full', 'opacity-0');
+            banner.classList.add('translate-y-0', 'opacity-100');
+        }
+
+        function closeNotificationsModal() {
+            const banner = document.getElementById('notificationsTopBanner');
+            banner.classList.remove('translate-y-0', 'opacity-100');
+            banner.classList.add('-translate-y-full', 'opacity-0', 'pointer-events-none');
+        }
+
+        async function openUserProfileModalById(userId) {
+            if (!userId) { 
+                alert('لا توجد معلومات مرتبطة بهذا الحساب'); 
+                return; 
+            }
+            try {
+                // جلب بيانات البروفايل بناءً على الـ ID الخاص بالحساب الثاني
+                const { data: profile, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (profile) {
+                    document.getElementById('modalProfileName').innerText = profile.full_name || 'غير محدد';
+                    document.getElementById('modalProfileJob').innerText = profile.job_title || '-';
+                    document.getElementById('modalProfileManager').innerText = profile.direct_manager || '-';
+                    document.getElementById('modalProfileGov').innerText = profile.governorate || '-';
+                    document.getElementById('modalProfilePhone').innerText = profile.phone || '-';
+                    document.getElementById('modalProfileEmail').innerText = profile.email || '-';
+                } else {
+                    document.getElementById('modalProfileName').innerText = 'غير متوفر في قاعدة البيانات';
+                    document.getElementById('modalProfileJob').innerText = '-';
+                    document.getElementById('modalProfileManager').innerText = '-';
+                    document.getElementById('modalProfileGov').innerText = '-';
+                    document.getElementById('modalProfilePhone').innerText = '-';
+                    document.getElementById('modalProfileEmail').innerText = '-';
+                }
+                document.getElementById('userProfileModal').classList.remove('hidden');
+            } catch (err) { 
+                console.error('خطأ في جلب بيانات البروفايل:', err.message); 
+                alert('عذراً، تعذر جلب بيانات الحساب المطلوب.');
+            }
+        }
+
+        function closeUserProfileModal() { document.getElementById('userProfileModal').classList.add('hidden'); }
+
+        async function openTicketDetailModal(ticketId) {
+            const ticket = allFetchedTickets.find(t => t.id == ticketId);
+            if (!ticket) return;
+
+            document.getElementById('activeTicketId').value = ticket.id;
+            document.getElementById('modalTicketNumDisplay').innerText = ticket.ticket_number || '#00001';
+            
+            document.getElementById('dtModalType').innerText = ticket.ticket_type || ticket.type || '-';
+            document.getElementById('dtModalZoneNumber').innerText = ticket.zone_number || ticket.zone_id || '-';
+            document.getElementById('dtModalProcess').value = ticket.process_number || '24';
+            document.getElementById('dtModalGovernorate').innerText = ticket.governorate || ticket.city || '-';
+            document.getElementById('dtModalFieldNotes').innerText = ticket.field_notes || ticket.notes || ticket.description || 'لا توجد ملاحظات مدخلة من قبل تيم الفيلد.';
+            
+            const statusSelect = document.getElementById('dtModalStatus');
+            const saveBtn = document.querySelector("#ticketDetailModal button[onclick='saveAndSendTicketUpdate()']");
+            const notesInput = document.getElementById('dtModalNotes');
+            const processInput = document.getElementById('dtModalProcess');
+            const newOpt = document.getElementById('optNewStatusOption');
+
+            statusSelect.value = ticket.status || 'جديد';
+            notesInput.value = '';
+            document.getElementById('selectedFileName').innerText = ticket.file_url ? 'ملف مرفق مسبقاً' : '';
+
+            const isClosed = (ticket.status === 'مكتملة' || ticket.status === 'مكتمل' || ticket.status === 'ملغي' || ticket.status === 'Canceled');
+            
+            if (isClosed) {
+                statusSelect.disabled = true;
+                notesInput.disabled = true;
+                processInput.disabled = true;
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    if (ticket.status === 'ملغي' || ticket.status === 'Canceled') {
+                        saveBtn.innerText = "الطلب ملغي ولا يمكن التعديل عليه بعد";
+                    } else {
+                        saveBtn.innerText = "الطلب مكتمل ومغلق لا يمكن التعديل عليه";
+                    }
+                }
+            } else {
+                statusSelect.disabled = false;
+                notesInput.disabled = false;
+                processInput.disabled = false;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    saveBtn.innerText = translations[currentLang].btnSaveSend || "حفظ التغييرات وإرسال الطلب للفيلد";
+                }
+            }
+
+            const hasHistory = (ticket.history_logs && ticket.history_logs.length > 0);
+            if (ticket.status !== 'جديد' || hasHistory) {
+                if (newOpt) newOpt.style.display = 'none';
+            } else {
+                if (newOpt) newOpt.style.display = 'block';
+            }
+
+            renderHistoryLogs(ticket);
+            document.getElementById('ticketDetailModal').classList.remove('hidden');
+        }
+
+     function renderHistoryLogs(ticket) {
+    const container = document.getElementById('historyLogsContainer');
+    const logs = ticket.history_logs || [];
+    
+    const allEvents = [...logs];
+    
+    if (ticket.created_at) {
+        allEvents.push({
+            timestamp: ticket.created_at,
+            author: ticket.sender_name || ticket.user_name || 'مشرف الميدان',
+            author_id: ticket.sender_id || ticket.user_id || null,
+            action: 'إنشاء الطلب وإرساله',
+            isCreation: true
+        });
+    }
+
+    if (allEvents.length === 0) {
+        container.innerHTML = `<div class="text-slate-500 text-center py-2">${translations[currentLang].noLogs}</div>`;
+        return;
+    }
+
+    const sortedEvents = allEvents.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    container.innerHTML = sortedEvents.map(log => `
+        <div class="p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl space-y-1 shadow-sm">
+            <div class="flex justify-between items-center text-[11px]">
+                <button type="button" onclick="openUserProfileModalById('${log.author_id || ''}')" class="font-black text-[#3A6B68] dark:text-[#4B8581] hover:underline cursor-pointer flex items-center gap-1">
+                    <span>👤</span> ${log.author || 'المستخدم'}
+                </button>
+                <span class="text-slate-500 dark:text-slate-400 font-mono text-[10px]">${new Date(log.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</span>
+            </div>
+            <div class="text-black dark:text-slate-200 font-bold text-xs pt-1">${log.action}</div>
+            ${log.notes ? `<div class="text-slate-600 dark:text-slate-400 italic text-[11px] bg-slate-100 dark:bg-slate-950/40 p-1.5 rounded border border-slate-200 dark:border-slate-800/50 mt-1">" ${log.notes} "</div>` : ''}
+        </div>
+    `).join('');
+}
+
+        function closeTicketDetailModal() { document.getElementById('ticketDetailModal').classList.add('hidden'); }
+        function handleFileSelected(file) { if (file) document.getElementById('selectedFileName').innerText = `تم اختيار الملف: ${file.name}`; }
+
+        const dropZone = document.getElementById('dropZone');
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(evt => dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.add('border-[#3A6B68]'); }));
+            ['dragleave', 'drop'].forEach(evt => dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove('border-[#3A6B68]'); }));
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    handleFileSelected(files[0]);
+                }
+            });
+            dropZone.addEventListener('click', () => document.getElementById('fileInput').click());
+        }
+
+        async function saveAndSendTicketUpdate() {
+            const ticketId = document.getElementById('activeTicketId').value;
+            const processNum = document.getElementById('dtModalProcess').value;
+            const newStatus = document.getElementById('dtModalStatus').value;
+            const notes = document.getElementById('dtModalNotes').value;
+            const fileInput = document.getElementById('fileInput');
+
+            const currentTicket = allFetchedTickets.find(t => t.id == ticketId);
+            const currentLogs = currentTicket ? (currentTicket.history_logs || []) : [];
+
+            let fileUrl = null;
+            if (fileInput.files && fileInput.files.length > 0) fileUrl = fileInput.files[0].name; 
+
+         const newLogEntry = {
+    timestamp: new Date().toISOString(),
+    author: currentUserProfile.name,
+    author_id: currentUserProfile.id,
+    action: `تغيير الحالة إلى: [${newStatus}]`,
+    notes: notes || ''
+};
+
+            const updatedLogs = [newLogEntry, ...currentLogs];
+
+            const updatePayload = {
+                process_number: processNum,
+                status: newStatus,
+                notes: notes,
+                office_assignee_id: currentUserProfile.id,
+                office_assignee_name: currentUserProfile.name,
+                history_logs: updatedLogs,
+                updated_at: new Date().toISOString()
+            };
+            
+            if (fileUrl) updatePayload.file_url = fileUrl;
+            if (newStatus === 'مكتملة' || newStatus === 'مكتمل') updatePayload.completed_at = new Date().toISOString();
+
+            const { error } = await supabaseClient.from('tickets').update(updatePayload).eq('id', ticketId);
+            if (!error) {
+                if (notificationSettings.statusUpdates) {
+const oldStatus = currentTicket?.status || 'سابقة';
+    const currentUserName = (typeof currentUser !== 'undefined' && (currentUser?.name || currentUser?.username)) 
+                            ? (currentUser.name || currentUser.username) 
+                            : 'مستخدم النظام';
+    const ticketNum = currentTicket?.ticket_number || '';
+
+addNotification(
+        `تم تحديث الطلب ${ticketNum} من حالة (${oldStatus}) إلى حالة (${newStatus}) بواسطة (${currentUserName})`, 'status', ticketNum, currentTicket?.ticket_type, ticketId);
+    }
+                alert('تم تحديث الطلب وحفظ البيانات في السجل بنجاح!');
+                closeTicketDetailModal();
+                fetchTickets();
+            } else { alert('خطأ أثناء التحديث: ' + error.message); }
+        }
+
+        function formatSlaDuration(targetDate, isCompleted, completedAtDate) {
+    const due = new Date(targetDate);
+    
+    // إذا كان الطلب مكتمل ومغلق
+    if (isCompleted) {
+        // نتحقق مما إذا كان الإكمال قد تم بعد تاريخ الـ SLA المحدد
+        const finishTime = completedAtDate ? new Date(completedAtDate) : new Date();
+        const diffMs = due - finishTime;
+        
+        // إذا كان الإكمال متأخراً عن الوقت المسموح
+        if (diffMs < 0) {
+            const absMs = Math.abs(diffMs);
+            const totalMinutes = Math.floor(absMs / (1000 * 60));
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
+        } else {
+            // إذا اكتمل ضمن الوقت المسموح
+            return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs">${currentLang === 'ar' ? 'تم الانجاز' : 'Done'}</span>`;
+        }
+    }
+
+    // إذا كان الطلب لا يزال مفتوحاً وقيد المعالجة/الانتظار
+    const now = new Date();
+    const diffMs = due - now;
+    const isLate = diffMs < 0;
+    const absMs = Math.abs(diffMs);
+
+    const totalMinutes = Math.floor(absMs / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    if (isLate) {
+        return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
+    } else {
+        return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs">متبقي ${hours}س و ${minutes}د</span>`;
+    }
+}
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '-';
+            
+            return date.toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+function renderTicketsTable(tickets) {
+    const tbody = document.getElementById('ticketsTableBody');
+    document.getElementById('totalTicketsCountBadge').innerText = tickets.length;
+
+    if (!tickets || tickets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-500 font-bold">${translations[currentLang].noNotifications}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = tickets.map(ticket => {
+        const now = new Date();
+        const dueDate = ticket.due_at || ticket.created_at || now;
+        const isCompleted = ticket.status === 'مكتملة' || ticket.status === 'مكتمل';
+
+        // 1. حساب الموظف المستقبل (عامود 11): أول أكشن بعد إنشاء الطلب ويبقى ثابتاً
+        let receiverName = '-';
+        let receiverId = '';
+        const logs = ticket.history_logs || [];
+        
+        // فرز الأحداث زمنياً من الأقدم للأحدث للبحث عن أول أكشن أوفيس
+        const sortedAscLogs = [...logs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        if (sortedAscLogs.length > 0) {
+            receiverName = sortedAscLogs[0].author || sortedAscLogs[0].user_name || '-';
+            receiverId = sortedAscLogs[0].author_id || sortedAscLogs[0].user_id || '';
+        } else if (ticket.office_assignee_name) {
+            receiverName = ticket.office_assignee_name;
+            receiverId = ticket.office_assignee_id || '';
+        }
+
+        // 2. حساب الحساب المنجز/صاحب آخر أكشن (عامود 12): يحدث باستمرار حسب أحدث أكشن
+        let lastActionName = '-';
+        let lastActionId = '';
+        const sortedDescLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        if (sortedDescLogs.length > 0) {
+            lastActionName = sortedDescLogs[0].author || sortedDescLogs[0].user_name || '-';
+            lastActionId = sortedDescLogs[0].author_id || sortedDescLogs[0].user_id || '';
+        } else if (ticket.office_assignee_name) {
+            lastActionName = ticket.office_assignee_name;
+            lastActionId = ticket.office_assignee_id || '';
+        } else if (ticket.sender_name) {
+            lastActionName = ticket.sender_name;
+            lastActionId = ticket.sender_id || '';
+        }
+
+        return `
+            <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer font-semibold border-b border-slate-200 dark:border-slate-800" onclick="openTicketDetailModal('${ticket.id}')">
+                <!-- 1. رقم الطلب -->
+                <td class="p-3 text-right font-bold text-[#3A6B68] dark:text-[#4B8581]">
+                    ${ticket.ticket_number || '#00001'}
+                </td>
+
+                <!-- 2. تاريخ الإنشاء -->
+                <td class="p-3 text-right font-mono text-xs">
+                    ${formatDateTime(ticket.created_at)}
+                </td>
+
+                <!-- 3. المرسل -->
+                <td class="p-3 text-right" onclick="event.stopPropagation()">
+                    <button type="button" onclick="openUserProfileModalById('${ticket.sender_id || ticket.user_id || ''}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
+                        <span>👤</span> ${ticket.sender_name || ticket.user_name || 'مرسل غير معروف'}
+                    </button>
+                </td>
+
+                <!-- 4. نوع الطلب -->
+                <td class="p-3 text-right font-bold">
+                    ${ticket.ticket_type || ticket.type || '-'}
+                </td>
+
+                <!-- 5. رقم البروسس -->
+                <td class="p-3 text-right font-mono font-bold">
+                    ${ticket.process_number || '-'}
+                </td>
+
+                <!-- 6. عنوان الزون -->
+                <td class="p-3 text-right">
+                    ${ticket.zone_address || ticket.zone_name || '-'}
+                </td>
+
+                <!-- 7. المحافظة -->
+                <td class="p-3 text-right font-bold">
+                    ${ticket.governorate || ticket.city || '-'}
+                </td>
+
+                <!-- 8. وقت SLA -->
+                <td class="p-3 text-right">
+                    ${formatSlaDuration(dueDate, isCompleted, ticket.completed_at)}
+                </td>
+
+                <!-- 9. حالة الطلب -->
+                <td class="p-3 text-right">
+                    <span class="px-2.5 py-1 rounded-xl text-xs font-black ${
+                        ticket.status === 'جديد' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-500/30' :
+                        ticket.status === 'قيد المعالجة' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30' :
+                        ticket.status === 'معلق' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30' :
+                        ticket.status === 'ملغي' ? 'bg-pink-500/20 text-pink-700 dark:text-pink-400 border border-pink-500/30' :
+                        ticket.status === 'يحتاج تعديل' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30' :
+                        (ticket.status === 'مكتملة' || ticket.status === 'مكتمل') ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30' :
+                        'bg-slate-200 text-slate-800'
+                    }">
+                        ${ticket.status || 'جديد'}
+                    </span>
+                </td>
+
+                <!-- 10. آخر تحديث -->
+                <td class="p-3 text-right font-mono text-xs">
+                    ${formatDateTime(ticket.updated_at || ticket.created_at)}
+                </td>
+
+                <!-- 11. الموظف المستقبل (أول أكشن أوفيس - ثابت) -->
+                <td class="p-3 text-right" onclick="event.stopPropagation()">
+                    ${receiverName !== '-' ? `
+                        <button type="button" onclick="openUserProfileModalById('${receiverId}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
+                            <span>👤</span> ${receiverName}
+                        </button>
+                    ` : '<span class="text-slate-400 font-bold">-</span>'}
+                </td>
+
+                <!-- 12. الحساب المنجز للطلب (صاحب آخر أكشن - يحدث باستمرار) -->
+                <td class="p-3 text-right" onclick="event.stopPropagation()">
+                    ${lastActionName !== '-' ? `
+                        <button type="button" onclick="openUserProfileModalById('${lastActionId}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
+                            <span>👤</span> ${lastActionName}
+                        </button>
+                    ` : '<span class="text-slate-400 font-bold">-</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+
+updateGrafanaCharts(tickets);        }
+
+        async function fetchTickets() {
+            try {
+                const { data, error } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                allFetchedTickets = data || [];
+                applyFilters();
+            } catch (err) {
+                console.error('Error fetching tickets:', err.message);
+            }
+        }
+
+        function applyFilters() {
+            const ticketNumQuery = document.getElementById('searchTicketNumInput')?.value.trim().toLowerCase() || '';
+            const zoneNameQuery = document.getElementById('searchNameInput')?.value.trim().toLowerCase() || '';
+            const typeQuery = document.getElementById('searchTypeInput')?.value.trim().toLowerCase() || '';
+            const senderQuery = document.getElementById('searchSenderInput')?.value.trim().toLowerCase() || '';
+            const assigneeQuery = document.getElementById('searchAssigneeInput')?.value.trim().toLowerCase() || '';
+            const statusSelect = document.getElementById('searchStatusSelect')?.value || 'ALL';
+            
+            const dateFromVal = document.getElementById('dateTimeFromInput')?.value;
+            const dateToVal = document.getElementById('dateTimeToInput')?.value;
+
+            displayedTickets = allFetchedTickets.filter(ticket => {
+                const tNum = (ticket.ticket_number || '').toLowerCase();
+                const zAddress = (ticket.zone_address || ticket.address || ticket.city || '').toLowerCase();
+                const tType = (ticket.ticket_type || ticket.type || '').toLowerCase();
+                const sName = (ticket.sender_name || ticket.user_name || '').toLowerCase();
+                const aName = (ticket.office_assignee_name || '').toLowerCase();
+                const tStatus = ticket.status || 'جديد';
+
+                const matchesNum = !ticketNumQuery || tNum.includes(ticketNumQuery);
+                const matchesZone = !zoneNameQuery || zAddress.includes(zoneNameQuery);
+                const matchesType = !typeQuery || tType.includes(typeQuery);
+                const matchesSender = !senderQuery || sName.includes(senderQuery);
+                const matchesAssignee = !assigneeQuery || aName.includes(assigneeQuery);
+                
+                let matchesStatus = true;
+                if (statusSelect !== 'ALL') {
+                    matchesStatus = (tStatus === statusSelect);
+                }
+
+                let matchesDate = true;
+                if (dateFromVal || dateToVal) {
+                    const ticketCreated = new Date(ticket.created_at);
+                    if (dateFromVal) {
+                        matchesDate = matchesDate && (ticketCreated >= new Date(dateFromVal));
+                    }
+                    if (dateToVal) {
+                        matchesDate = matchesDate && (ticketCreated <= new Date(dateToVal));
+                    }
+                }
+
+                return matchesNum && matchesZone && matchesType && matchesSender && matchesAssignee && matchesStatus && matchesDate;
+            });
+
+            if (currentSortColumn) {
+                executeSort(displayedTickets, currentSortColumn, currentSortDirection);
+            }
+
+            renderTicketsTable(displayedTickets);
+        }
+
+        function sortTable(column, direction) {
+            currentSortColumn = column;
+            currentSortDirection = direction;
+            applyFilters();
+        }
+
+        function executeSort(tickets, column, direction) {
+            if (direction === 'default') return;
+
+            tickets.sort((a, b) => {
+                let valA = a[column] || '';
+                let valB = b[column] || '';
+
+                if (direction === 'asc' || direction === 'desc') {
+                    let dateA = new Date(valA).getTime() || 0;
+                    let dateB = new Date(valB).getTime() || 0;
+                    return direction === 'asc' ? dateA - dateB : dateB - dateA;
+                }
+
+                if (direction === 'asc_str' || direction === 'desc_str') {
+                    valA = String(valA).toLowerCase();
+                    valB = String(valB).toLowerCase();
+                    if (valA < valB) return direction === 'asc_str' ? -1 : 1;
+                    if (valA > valB) return direction === 'asc_str' ? 1 : -1;
+                    return 0;
+                }
+
+                return 0;
+            });
+        }
+
+        function navigateTo(view) {
+            closeSidebar();
+            if (view === 'home') {
+                document.getElementById('homeView').classList.remove('hidden');
+                document.getElementById('profileView').classList.add('hidden');
+                fetchTickets();
+            } else if (view === 'profile') {
+                document.getElementById('homeView').classList.add('hidden');
+                document.getElementById('profileView').classList.remove('hidden');
+                loadUserProfileData();
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+            setTimeout(() => document.getElementById('sidebarOverlay').classList.remove('opacity-0'), 10);
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.add('opacity-0');
+            setTimeout(() => document.getElementById('sidebarOverlay').classList.add('hidden'), 300);
+        }
+
+        function openLogoutModal() {
+            closeSidebar();
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+
+        async function confirmLogout() {
+            await supabaseClient.auth.signOut();
+            location.reload();
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        async function submitNewPassword() {
+            const newPass = document.getElementById('newPasswordInput').value;
+            if (!newPass || newPass.length < 6) {
+                alert('كلمة المرور يجب أن لا تقل عن 6 أحرف');
+                return;
+            }
+            try {
+                const { error } = await supabaseClient.auth.updateUser({ password: newPass });
+                if (error) throw error;
+                alert('تم تغيير كلمة المرور بنجاح!');
+                closeChangePasswordModal();
+            } catch (err) {
+                alert('خطأ أثناء التغيير: ' + err.message);
+            }
+        }
+
+    // دالة إضافة إشعار جديد (تُنشأ بحالة unread)
+function addNotification(message, type = 'status', ticketNum = '', ticketType = '', ticketId = null) {
+    const newNotif = {
+        id: Date.now(),
+        message: message,
+        type: type,
+        ticketNum: ticketNum,
+        ticketType: ticketType,
+        ticketId: ticketId,
+        read: false, // تعيين كغير مقروء افتراضياً
+        timestamp: new Date().toISOString()
+    };
+
+    // التأكد من وجود المصفوفة
+    if (!window.notificationsList) {
+        window.notificationsList = [];
+    }
+
+    notificationsList.unshift(newNotif);
+    
+    // حفظ وتحديث الواجهة (تأكد من وجود هذه الدوال لديك)
+    if (typeof saveNotificationsToStorage === 'function') saveNotificationsToStorage();
+    if (typeof updateNotificationsUI === 'function') updateNotificationsUI();
+    if (typeof playIphoneNotificationSound === 'function') playIphoneNotificationSound();
+}
+
+// دالة تحديث واجهة الإشعارات
+function updateNotificationsUI() {
+    const container = document.getElementById('notificationsList');
+    const badge = document.getElementById('headerBellBadge');
+    
+    // فلترة الإشعارات غير المقروءة فقط للحساب والأيقونة
+    const unreadCount = notificationsList.filter(n => !n.read).length;
+    
+    if (badge) {
+        if (unreadCount > 0) {
+            badge.innerText = unreadCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    // إذا كانت القائمة فارغة أو تم قراءة/مسح كل الإشعارات
+    if (!container) return;
+    
+    if (notificationsList.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500" data-i18n="noNotifications">${translations[currentLang].noNotifications || 'لا توجد إشعارات حالياً'}</div>`;
+        return;
+    }
+
+    // عرض الإشعارات مع إضافة التظليل الأزرق للـ unread وزر الضغط عليها
+    container.innerHTML = notificationsList.map(n => `
+        <div onclick="markNotificationAsRead(${n.id}, '${n.ticketId || ''}')" 
+             class="notification-item ${!n.read ? 'unread' : ''} p-3 rounded-xl border border-slate-200 dark:border-slate-800 transition cursor-pointer hover:opacity-90 flex justify-between items-center gap-2">
+            <div class="space-y-1 flex-1">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">${n.message}</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${new Date(n.timestamp).toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</div>
+            </div>
+            ${!n.read ? '<span class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" title="غير مقروء"></span>' : ''}
+        </div>
+    `).join('');
+}
+
+// دالة تعليم الإشعار كمقروء عند الضغط عليه وإخفائه/تحديث القائمة
+function markNotificationAsRead(notifId, ticketId) {
+    const notif = notificationsList.find(n => n.id === notifId);
+    if (notif) {
+        notif.read = true; // تحويل الحالة إلى مقروء
+        saveNotificationsToStorage();
+        updateNotificationsUI();
+    }
+    
+    // فتح تفاصيل الطلب مباشرة إن وجد
+    if (ticketId && ticketId !== 'null' && ticketId !== 'undefined') {
+        closeNotificationsModal();
+        openTicketDetailModal(ticketId);
+    }
+}
+
+// دالة مسح كل الإشعارات
+function clearNotifications() {
+    notificationsList = [];
+    saveNotificationsToStorage();
+    updateNotificationsUI();
+}
+   function exportTableToExcel() {
+    const table = document.querySelector(".table-scroll-container table");
+    if (!table) return;
+
+    // استخراج عناوين الأوردة والأعمدة (Header Row)
+    const headers = [];
+    const headerCells = table.querySelectorAll("thead tr th");
+    headerCells.forEach(th => {
+        // نأخذ النص الرئيسي للعنوان فقط قبل القوائم المنسدلة
+        const textNode = th.querySelector("span") || th;
+        let headerText = textNode.innerText.trim();
+        headers.push(headerText);
+    });
+
+    // استخراج بيانات الصفوف (Body Rows)
+    const rowsData = [];
+    const bodyRows = table.querySelectorAll("tbody tr");
+
+    bodyRows.forEach(row => {
+        const rowCells = row.querySelectorAll("td");
+        if (rowCells.length > 1) { // تخطي صف التلميح "جاري التحميل"
+            const rowData = [];
+            rowCells.forEach(td => {
+                // استخراج النص من داخل الخلايا واستبعاد الأزرار أو حقول الإدخال
+                let cellText = td.innerText.replace(/[\r\n]+/g, " ").trim();
+                rowData.push(cellText);
+            });
+            rowsData.push(rowData);
+        }
+    });
+
+    // دمج العناوين مع البيانات في مصفوفة واحدة
+    const excelData = [headers, ...rowsData];
+
+    // إنشاء كتاب العمل والورقة باستخدام SheetJS (XLSX)
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Tickets Data");
+
+    // تنزيل ملف أكسل
+    XLSX.writeFile(workbook, `Tickets_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+    </script>
+</body>
+</html>
