@@ -159,15 +159,15 @@
             line-height: 1;
             font-family: monospace;
         }
-        /* خلفية زرقاء فاتحة مع إطار مميز للإشعارات غير المقروءة */
-.notification-item.unread {
-    background-color: rgba(59, 130, 246, 0.15) !important;
-    border-right: 4px solid #3b82f6 !important;
-}
-.dark .notification-item.unread {
-    background-color: rgba(59, 130, 246, 0.25) !important;
-    border-right: 4px solid #60a5fa !important;
-}
+        
+        .notification-item.unread {
+            background-color: rgba(59, 130, 246, 0.15) !important;
+            border-right: 4px solid #3b82f6 !important;
+        }
+        .dark .notification-item.unread {
+            background-color: rgba(59, 130, 246, 0.25) !important;
+            border-right: 4px solid #60a5fa !important;
+        }
     </style>
 </head>
 <body class="bg-slate-200 dark:bg-slate-950 text-black dark:text-slate-100 text-right" dir="rtl">
@@ -241,43 +241,65 @@
         </button>
     </aside>
 
-    <main id="loginSection" class="w-full max-w-md mx-auto my-auto flex flex-col items-center py-12 px-4 space-y-6">
-        <div class="w-full flex justify-between items-center bg-white dark:bg-slate-900/80 p-3 px-5 ios-card border border-slate-300 dark:border-slate-800 shadow-sm">
-            <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
-                <span class="themeIcon">☀️</span>
-                <span class="themeText">الشمس</span>
-            </button>
-            <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
-                <span>🌐</span>
-                <span class="langText">English</span>
-            </button>
-        </div>
-        <div class="w-full flex justify-center">
-            <img src="Logo.png" alt="SANA Logo" class="w-48 h-auto object-contain">
-        </div>
-        <div class="ios-card bg-white dark:bg-slate-900/90 p-8 border border-slate-300 dark:border-slate-800 text-right shadow-xl">
-            <h1 data-i18n="portalTitle" class="text-2xl font-black text-center text-black dark:text-white mb-1">لوحة تحكم الباك أوفيس</h1>
-            <p data-i18n="portalSubtitle" class="text-xs text-center text-slate-600 dark:text-slate-400 mb-6">يرجى تسجيل الدخول لمتابعة الـ SLA والطلبات</p>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
+<main id="loginSection" class="w-full max-w-2xl mx-auto my-auto flex flex-col items-center py-12 px-4 space-y-6">
+    <div class="w-full flex justify-between items-center bg-white dark:bg-slate-900/80 p-3 px-5 ios-card border border-slate-300 dark:border-slate-800 shadow-sm">
+        <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+            <span class="themeIcon">☀️</span>
+            <span class="themeText">الشمس</span>
+        </button>
+        <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
+            <span>🌐</span>
+            <span class="langText">English</span>
+        </button>
+    </div>
+
+<div class="ios-card bg-white dark:bg-slate-900/90 p-8 border border-slate-300 dark:border-slate-800 text-right shadow-xl w-full max-w-4xl mx-auto">
+    <div class="text-center mb-8 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <h1 data-i18n="portalTitle" class="text-3xl font-black text-[#3A6B68] dark:text-[#4B8581] mb-1">لوحة تحكم الخدمات الإدارية</h1>
+        <p data-i18n="portalSubtitle" class="text-sm text-slate-600 dark:text-slate-400">لوحة تحكم الخدمات الإدارية - يرجى تسجيل الدخول لمتابعة الطلبات والـ SLA</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <div class="md:col-span-7 order-1 space-y-4">
+            <form onsubmit="handleLogin(event)" id="loginForm" novalidate class="space-y-4">
                 <div>
                     <label data-i18n="lblEmail" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-right">البريد الإلكتروني</label>
-                    <input type="email" id="loginEmail" required placeholder="office@example.com" class="ios-input w-full p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-black dark:text-white text-sm font-semibold focus:outline-none">
+                    <input type="email" id="loginEmail" placeholder="office@example.com" class="ios-input w-full p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-black dark:text-white text-sm font-semibold focus:outline-none">
+                    <span id="emailError" class="hidden text-rose-500 font-bold text-[11px] mt-1 text-right block">⚠️ يرجى كتابة البريد الإلكتروني</span>
                 </div>
+
                 <div>
                     <label data-i18n="lblPassword" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-right">كلمة المرور</label>
                     <div class="relative">
-                        <input type="password" id="loginPassword" required placeholder="••••••••" class="ios-input w-full p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-black dark:text-white text-sm font-semibold focus:outline-none">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-sana focus:outline-none">
+                        <input type="password" id="loginPassword" placeholder="••••••••" class="ios-input w-full p-3.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-black dark:text-white text-sm font-semibold focus:outline-none pl-10">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#3A6B68] focus:outline-none">
                             <span id="passEyeIcon">👁️</span>
                         </button>
                     </div>
+                    <span id="passwordError" class="hidden text-rose-500 font-bold text-[11px] mt-1 text-right block">⚠️ يرجى كتابة كلمة المرور</span>
                 </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" id="rememberMe" class="w-4 h-4 accent-[#3A6B68] rounded cursor-pointer">
+                        <span>تذكر بياناتي</span>
+                    </label>
+                </div>
+
                 <button type="submit" data-i18n="loginBtn" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white font-black py-4 text-base shadow-lg shadow-[#3A6B68]/30 transition mt-2">
                     تسجيل الدخول
                 </button>
             </form>
         </div>
-    </main>
+
+        <div class="md:col-span-5 flex flex-col justify-center items-center h-full border-t md:border-t-0 md:border-r border-slate-200 dark:border-slate-800 pt-4 md:pt-0 md:pr-8 order-2">
+            <div class="w-full h-full min-h-[260px] flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-700/50">
+                <img src="Logo.png" alt="SANA Logo" class="max-h-56 w-auto object-contain filter drop-shadow-md">
+            </div>
+        </div>
+    </div>
+</div>
+</main>
 
     <div id="mainAppWrapper" class="hidden flex-col min-h-screen justify-between">
         <header class="w-full bg-white/95 dark:bg-slate-900/90 border-b border-slate-300 dark:border-slate-800 px-8 py-4 shadow-sm sticky top-0 z-30 backdrop-blur-md">
@@ -324,10 +346,7 @@
         <div class="workspace-container">
             <div id="homeView" class="w-full space-y-6 text-right">
                 
-                <!-- قسم الجارتات الستة مرتبة 3 في كل سطر -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-                    
-                    <!-- السطر الأول -->
                     <!-- 1. قيد المعالجة -->
                     <div class="grafana-card">
                         <span class="text-xs font-black text-purple-600 dark:text-purple-400" data-i18n="chartProcessing">قيد المعالجة</span>
@@ -367,7 +386,6 @@
                         </div>
                     </div>
 
-                    <!-- السطر الثاني -->
                     <!-- 4. متوقفة -->
                     <div class="grafana-card">
                         <span class="text-xs font-black text-rose-600 dark:text-rose-400" data-i18n="chartStopped">متوقفة (Hold)</span>
@@ -406,11 +424,9 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="ios-card bg-white dark:bg-slate-900/90 p-6 md:p-8 border border-slate-300 dark:border-slate-800 space-y-6 shadow-lg">
-                    
                     <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-4">
                         <div class="flex items-center gap-4">
                             <h3 class="text-xl font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-2">
@@ -422,12 +438,10 @@
                                 <span id="totalTicketsCountBadge" class="text-2xl font-black text-[#3A6B68] dark:text-[#4B8581] font-mono">0</span>
                             </div>
                         </div>
-                        <!-- الجانب الأيسر: زر التصدير إلى إكسل -->
-    <button id="exportExcelBtn" onclick="exportTableToExcel()" class="bg-[#107c41] hover:bg-[#0e6b37] text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95">
-        <span>📊</span>
-        <span>EXPORT TO EXCEL</span>
-    </button>
-</div>
+                        <button id="exportExcelBtn" onclick="exportTableToExcel()" class="bg-[#107c41] hover:bg-[#0e6b37] text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95">
+                            <span>📊</span>
+                            <span>EXPORT TO EXCEL</span>
+                        </button>
                     </div>
 
                     <button onclick="toggleSearchBox()" class="w-full py-3.5 px-6 rounded-2xl bg-[#3A6B68] hover:bg-[#2E5553] text-white font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 border border-[#3A6B68]/50">
@@ -437,52 +451,42 @@
                     </button>
 
                     <div id="collapsibleSearchSection" class="hidden bg-slate-100 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-300 dark:border-slate-800/80 space-y-3 transition-all">
-               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 items-end">
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="ticketNumLabel">🔢 رقم الطلب</label>
-        <input type="text" id="searchTicketNumInput" oninput="applyFilters()" placeholder="#00001" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <!-- مستطيل فلترة رقم البروسس الجديد -->
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">⚙️ رقم البروسس</label>
-        <input type="text" id="searchProcessNumInput" oninput="applyFilters()" placeholder="رقم البروسس" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="zoneNameLabel">📍 اسم الزون</label>
-        <input type="text" id="searchNameInput" oninput="applyFilters()" placeholder="اسم المنطقة أو العنوان" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <!-- مستطيل / قائمة فلترة المحافظة الجديدة -->
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">🏛️ المحافظة</label>
-        <input type="text" id="searchGovernorateInput" oninput="applyFilters()" placeholder="ابحث بالمحافظة" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="ticketTypeLabel">🏷️ نوع الطلب</label>
-        <input type="text" id="searchTypeInput" oninput="applyFilters()" placeholder="نوع الطلب" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="senderLabel">👤 المرسل</label>
-        <input type="text" id="searchSenderInput" oninput="applyFilters()" placeholder="صاحب الحساب المرسل" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="assigneeLabel">👨‍💼 الأوفيس المستلم</label>
-        <input type="text" id="searchAssigneeInput" oninput="applyFilters()" placeholder="الحساب المستلم" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-    </div>
-    <div>
-        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="statusLabel">📌 حالة الطلب</label>
-        <select id="searchStatusSelect" onchange="applyFilters()" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
-            <option value="ALL" data-i18n="optAll">الكل</option>
-            <option value="جديد" data-i18n="optNew">جديد</option>
-            <option value="قيد المعالجة" data-i18n="optInProc">قيد المعالجة</option>
-            <option value="معلق" data-i18n="optHold">متوقفة (Hold)</option>
-            <option value="يحتاج تعديل" data-i18n="optNeedsUpdate">يحتاج تعديل</option>
-            <option value="مكتملة" data-i18n="optCompleted">مكتملة</option>
-            <option value="ملغي" data-i18n="optCanceled">ملغي</option>
-        </select>
-    </div>
-</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 items-end">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="ticketNumLabel">🔢 رقم الطلب</label>
+                                <input type="text" id="searchTicketNumInput" oninput="applyFilters()" placeholder="#00001" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">⚙️ رقم البروسس</label>
+                                <input type="text" id="searchProcessNumInput" oninput="applyFilters()" placeholder="رقم البروسس" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="zoneNameLabel">📍 اسم الزون</label>
+                                <input type="text" id="searchNameInput" oninput="applyFilters()" placeholder="اسم المنطقة أو العنوان" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">🏛️ المحافظة</label>
+                                <input type="text" id="searchGovernorateInput" oninput="applyFilters()" placeholder="ابحث بالمحافظة" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="ticketTypeLabel">🏷️ نوع الطلب</label>
+                                <input type="text" id="searchTypeInput" oninput="applyFilters()" placeholder="نوع الطلب" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="senderLabel">👤 المرسل</label>
+                                <input type="text" id="searchSenderInput" oninput="applyFilters()" placeholder="صاحب الحساب المرسل" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="assigneeLabel">👨‍💼 الأوفيس المستلم</label>
+                                <input type="text" id="searchAssigneeInput" oninput="applyFilters()" placeholder="الحساب المستلم" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1">👷‍♂️ الموظف المنجز</label>
+                                <input type="text" id="searchCompletedUserOption" oninput="applyFilters()" placeholder="الموظف المنجز النهائي" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
+                            </div>
+                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 items-end">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 items-end">
                             <div>
                                 <label class="block text-[11px] font-bold text-[#3A6B68] dark:text-[#4B8581] mb-1">⚡ خيارات بحث سريعة</label>
                                 <select id="quickDateFilterSelect" onchange="applyQuickDateFilter(this.value)" class="ios-input p-2.5 bg-white dark:bg-slate-800 border-2 border-[#3A6B68]/40 text-xs font-bold text-black dark:text-white focus:outline-none cursor-pointer">
@@ -504,182 +508,208 @@
                                 <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="dateToLabel">📅 إلى (تاريخ ووقت)</label>
                                 <input type="datetime-local" id="dateTimeToInput" onclick="this.showPicker()" onchange="applyFilters()" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none cursor-pointer">
                             </div>
+
+                            <div class="relative">
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="statusLabel">📌 حالة الطلب (تحديد متعدد)</label>
+                                <button type="button" onclick="toggleStatusDropdown(event)" id="statusDropdownBtn" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-right flex justify-between items-center w-full cursor-pointer">
+                                    <span id="selectedStatusText">الكل مسبقاً</span>
+                                    <span class="text-[10px]">▼</span>
+                                </button>
+                                
+                                <div id="statusDropdownMenu" class="hidden absolute top-full right-0 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl shadow-xl z-50 p-2 space-y-1.5 text-xs font-bold max-h-56 overflow-y-auto">
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="ALL" checked onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>الكل</span>
+                                    </label>
+                                    <hr class="border-slate-200 dark:border-slate-700">
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="جديد" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>جديد</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="قيد المعالجة" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>قيد المعالجة</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="معلق" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>متوقفة (Hold)</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="يحتاج تعديل" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>يحتاج تعديل</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="مكتملة" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>مكتملة</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
+                                        <input type="checkbox" value="ملغي" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
+                                        <span>ملغي</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="table-scroll-container border border-slate-300 dark:border-slate-800 shadow-inner">
-                  <table class="w-full text-right border-collapse text-xs md:text-sm min-w-[1400px]">
-    <thead class="sticky top-0 z-20">
-   <tr class="bg-[#3A6B68] text-white font-bold shadow">
-    <!-- 1. رقم الطلب -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thTicketNum">1. رقم الطلب</span>
-            <select onchange="sortTable('ticket_number', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                        <table class="w-full text-right border-collapse text-xs md:text-sm min-w-[1400px]">
+                            <thead class="sticky top-0 z-20">
+                                <tr class="bg-[#3A6B68] text-white font-bold shadow">
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thTicketNum">1. رقم الطلب</span>
+                                            <select onchange="sortTable('ticket_number', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 2. تاريخ الإنشاء -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span>2. تاريخ الإنشاء</span>
-            <select onchange="sortTable('created_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span>2. تاريخ الإنشاء</span>
+                                            <select onchange="sortTable('created_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 3. المرسل -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thSender">3. المرسل</span>
-            <select onchange="sortTable('sender_name', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thSender">3. المرسل</span>
+                                            <select onchange="sortTable('sender_name', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 4. نوع الطلب -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thType">4. نوع الطلب</span>
-            <select onchange="sortTable('ticket_type', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thType">4. نوع الطلب</span>
+                                            <select onchange="sortTable('ticket_type', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 5. رقم البروسس -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thProcessNum">5. رقم البروسس</span>
-            <select onchange="sortTable('process_number', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thProcessNum">5. رقم البروسس</span>
+                                            <select onchange="sortTable('process_number', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 6. عنوان الزون -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thZoneAddress">6. عنوان الزون</span>
-            <select onchange="sortTable('zone_address', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thZoneAddress">6. عنوان الزون</span>
+                                            <select onchange="sortTable('zone_address', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 7. المحافظة -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span>7. المحافظة</span>
-            <select onchange="sortTable('governorate', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span>7. المحافظة</span>
+                                            <select onchange="sortTable('governorate', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 8. وقت SLA / التاريخ -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thSlaTime">8. وقت SLA / التاريخ</span>
-            <select onchange="sortTable('due_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thSlaTime">8. وقت SLA / التاريخ</span>
+                                            <select onchange="sortTable('due_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 9. حالة الطلب -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span data-i18n="thStatus">9. حالة الطلب</span>
-            <select onchange="sortTable('status', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span data-i18n="thStatus">9. حالة الطلب</span>
+                                            <select onchange="sortTable('status', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 10. آخر تحديث -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span>10. آخر تحديث</span>
-            <select onchange="sortTable('updated_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span>10. آخر تحديث</span>
+                                            <select onchange="sortTable('updated_at', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 11. الموظف المستقبل (أول أكشن أوفيس ثابت) -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span>11. الموظف المستقبل</span>
-            <select onchange="sortTable('office_first_receiver', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span>11. الموظف المستقبل</span>
+                                            <select onchange="sortTable('office_first_receiver', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
 
-    <!-- 12. اسم الحساب المنجز/صاحب آخر أكشن -->
-    <th class="p-3 text-right">
-        <div class="flex flex-col gap-1">
-            <span>12. الحساب المنجز (آخر أكشن)</span>
-            <select onchange="sortTable('office_last_action_user', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
-                <option value="default" data-i18n="sortLabel">الترتيب</option>
-                <option value="asc_str" data-i18n="sortAZ">a-z</option>
-                <option value="desc_str" data-i18n="sortZA">z-a</option>
-                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
-                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
-            </select>
-        </div>
-    </th>
-</tr>
-</thead>
-    <tbody id="ticketsTableBody" class="divide-y divide-slate-300 dark:divide-slate-800 bg-white/70 dark:bg-slate-900/50">
-        <tr><td colspan="10" class="p-6 text-center text-slate-500 font-bold" data-i18n="loadingData">جاري تحميل البيانات بالوقت الحقيقي...</td></tr>
-    </tbody>
-</table>
-<!-- حاوية أسفل الجدول لتثبيت الزر جهة اليسار -->
-
+                                    <th class="p-3 text-right">
+                                        <div class="flex flex-col gap-1">
+                                            <span>12. الحساب المنجز (آخر أكشن)</span>
+                                            <select onchange="sortTable('office_last_action_user', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
+                                                <option value="default" data-i18n="sortLabel">الترتيب</option>
+                                                <option value="asc_str" data-i18n="sortAZ">a-z</option>
+                                                <option value="desc_str" data-i18n="sortZA">z-a</option>
+                                                <option value="desc" data-i18n="sortNewest">من الأحدث للأقدم</option>
+                                                <option value="asc" data-i18n="sortOldest">من الأقدم للأحدث</option>
+                                            </select>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticketsTableBody" class="divide-y divide-slate-300 dark:divide-slate-800 bg-white/70 dark:bg-slate-900/50">
+                                <tr><td colspan="12" class="p-6 text-center text-slate-500 font-bold" data-i18n="loadingData">جاري تحميل البيانات بالوقت الحقيقي...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -763,7 +793,8 @@
         </div>
     </div>
 
-<div id="userProfileModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden text-right">        <div class="ios-card bg-white dark:bg-slate-900 p-8 rounded-3xl max-w-md w-full border border-slate-300 dark:border-slate-800 space-y-4 shadow-2xl">
+    <div id="userProfileModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-8 rounded-3xl max-w-md w-full border border-slate-300 dark:border-slate-800 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-3">
                 <h3 class="text-base font-bold text-black dark:text-slate-100 flex items-center gap-2"><span>👤</span> <span data-i18n="userFullDetails">تفاصيل الحساب الكاملة</span></h3>
                 <button onclick="closeUserProfileModal()" class="text-slate-500 hover:text-black dark:hover:text-white text-lg font-bold">✕</button>
@@ -804,7 +835,7 @@
         </div>
     </div>
 
-    <!-- modal: تفاصيل الطلب الكاملة -->
+    <!-- نافذة تفاصيل الطلب الكاملة مع نظام الملفات المحدث -->
     <div id="ticketDetailModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right overflow-y-auto">
         <div class="ios-card bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl max-w-2xl w-full border border-slate-300 dark:border-slate-800 space-y-5 shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-3">
@@ -845,15 +876,35 @@
                 </div>
             </div>
 
-            <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400" data-i18n="attachFiles">إرفاق الملفات (Drag & Drop أو تصفح)</label>
-                <div id="dropZone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#3A6B68] rounded-2xl p-6 text-center bg-slate-100/50 dark:bg-slate-800/40 transition cursor-pointer flex flex-col items-center justify-center gap-2">
-                    <span class="text-2xl">📁</span>
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300" data-i18n="dragFiles">اسحب الملفات هنا أو اضغط للتصفح والرفع</span>
+            <!-- قسم إرفاق وعرض ملفات الطلب -->
+            <div class="bg-[#3A6B68]/10 dark:bg-[#3A6B68]/15 border-2 border-[#3A6B68]/40 dark:border-[#4B8581]/50 p-4 rounded-2xl space-y-3 shadow-inner">
+                <div class="flex items-center justify-between border-b border-[#3A6B68]/20 dark:border-[#3A6B68]/30 pb-2">
+                    <label class="block text-xs font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-1.5">
+                        <span>📎</span> <span>منطقة المرفقات والملفات الخاصة بالطلب</span>
+                    </label>
+                    <span class="text-[10px] font-bold text-[#3A6B68] dark:text-[#4B8581] bg-white/70 dark:bg-slate-800/70 px-2 py-0.5 rounded-lg border border-[#3A6B68]/30">سحابة التخزين</span>
+                </div>
+                
+                <!-- منطقة السحب والإفلات والرفع -->
+                <div id="dropZone" onclick="document.getElementById('fileInput').click()" 
+                     ondragover="event.preventDefault(); this.classList.add('border-[#3A6B68]', 'bg-[#3A6B68]/20');" 
+                     ondragleave="this.classList.remove('border-[#3A6B68]', 'bg-[#3A6B68]/20');" 
+                     ondrop="handleDrop(event)"
+                     class="border-2 border-dashed border-[#3A6B68]/50 hover:border-[#3A6B68] rounded-xl p-3 text-center bg-white/60 dark:bg-slate-900/40 transition cursor-pointer flex flex-col items-center justify-center gap-1 shadow-sm">
+                    <span class="text-xl">📁</span>
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">اسحب الملفات هنا أو اضغط للتصفح والرفع</span>
                     <input type="file" id="fileInput" class="hidden" onchange="handleFileSelected(this.files[0])">
                     <span id="selectedFileName" class="text-[11px] text-[#3A6B68] font-bold"></span>
                 </div>
+                <!-- قائمة سجل الملفات المرفوعة -->
+                <div>
+                    <span class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">الملفات المرفوعة حالياً:</span>
+                    <div id="uploadedFilesList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- يتم ملؤها تلقائياً عبر loadTicketFiles -->
+                    </div>
+                </div>
             </div>
+
 
             <div>
                 <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="addComment">إضافة تعليق / إجراء جديد</label>
@@ -898,24 +949,81 @@
         </div>
     </div>
 
-    <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
-        <div class="ios-card bg-white dark:bg-slate-900 p-8 rounded-3xl max-w-md w-full border border-slate-300 dark:border-slate-800 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-300 dark:border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-black dark:text-slate-100" data-i18n="btnChangePass">🔒 تغيير الرمز السري</h3>
-                <button onclick="closeChangePasswordModal()" class="text-slate-500 hover:text-black dark:hover:text-white">✕</button>
+ <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <span>🔒</span> <span>تغيير الرمز السري</span>
+                </h3>
+                <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg font-bold">✕</button>
             </div>
-            <div class="space-y-3">
+            <form onsubmit="handlePreChangePassword(event)" class="space-y-3">
+                <!-- 1. كلمة المرور القديمة / الحالية -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="lblNewPass">كلمة المرور الجديدة</label>
-                    <input type="password" id="newPasswordInput" placeholder="••••••••" class="ios-input w-full p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-black dark:text-slate-100">
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">كلمة المرور الحالية (القديمة)</label>
+                    <div class="relative">
+                        <input type="password" id="oldPasswordInput" required placeholder="أدخل كلمة المرور الحالية" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none pl-10">
+                        <button type="button" onclick="togglePassView('oldPasswordInput', 'eyeIcon0')" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#3A6B68] focus:outline-none">
+                            <span id="eyeIcon0">👁️</span>
+                        </button>
+                    </div>
                 </div>
+                <!-- 2. كلمة المرور الجديدة -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">كلمة المرور الجديدة</label>
+                    <div class="relative">
+                        <input type="password" id="newPasswordInput" required minlength="6" placeholder="أدخل 6 أحرف أو أرقام على الأقل" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none pl-10">
+                        <button type="button" onclick="togglePassView('newPasswordInput', 'eyeIcon1')" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#3A6B68] focus:outline-none">
+                            <span id="eyeIcon1">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- 3. تأكيد كلمة المرور الجديدة -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">تأكيد كلمة المرور الجديدة</label>
+                    <div class="relative">
+                        <input type="password" id="confirmPasswordInput" required minlength="6" placeholder="أعد كتابة كلمة المرور للتأكيد" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none pl-10">
+                        <button type="button" onclick="togglePassView('confirmPasswordInput', 'eyeIcon2')" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#3A6B68] focus:outline-none">
+                            <span id="eyeIcon2">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- رسالة التنبيهات والأخطاء -->
+                <p id="passChangeMsg" class="hidden text-xs font-bold p-2.5 rounded-xl text-center"></p>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="submit" id="btnOpenConfirmPass" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-black py-3.5 shadow-md transition">
+                        حفظ ومتابعة ⬅️
+                    </button>
+                    <button type="button" onclick="closeChangePasswordModal()" class="ios-button flex-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold py-3.5">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 2. نافذة تأكيد التغيير وإنهاء الجلسة (مطابقة لشكل نافذة تسجيل الخروج) -->
+    <div id="confirmChangePassModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden text-right">
+        <div class="ios-card bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl max-w-sm w-full border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 rounded-full bg-[#3A6B68]/15 text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center mx-auto text-2xl font-bold border border-[#3A6B68]/30">
+                🔑
             </div>
-            <div class="flex gap-3 pt-2">
-                <button onclick="submitNewPassword()" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-bold py-3.5" data-i18n="btnSave">حفظ التغيير</button>
-                <button onclick="closeChangePasswordModal()" class="ios-button flex-1 bg-slate-300 dark:bg-slate-800 text-black dark:text-slate-300 text-xs font-bold py-3.5" data-i18n="cancel">إلغاء</button>
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-white">تأكيد تغيير الرمز السري</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                هل أنت متأكد من رغبتك في تغيير الرمز السري؟<br>
+                <strong class="text-rose-500 font-black">سيتم إنهاء الجلسة وتسجيل الخروج تلقائياً</strong> لتسجيل الدخول بالرمز الجديد.
+            </p>
+            <div class="flex gap-2.5 pt-2">
+                <button onclick="executePasswordChangeAndLogout()" id="btnExecuteChangePass" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-black py-3.5 shadow-lg">
+                    نعم، تغيير وخروج
+                </button>
+                <button onclick="closeConfirmChangePassModal()" class="ios-button flex-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold py-3.5">
+                    إلغاء
+                </button>
             </div>
         </div>
     </div>
+
+
 
     <script>
         const SUPABASE_URL = 'https://xliwjzykrtlbujqkmqke.supabase.co/';
@@ -936,7 +1044,7 @@
         const translations = {
             ar: {
                 navHome: "الصفحة الرئيسية", navProfile: "حسابي", navNotificationSettings: "إعدادات الإشعارات", btnLogout: "تسجيل الخروج",
-                portalTitle: "لوحة تحكم الباك أوفيس", portalSubtitle: "يرجى تسجيل الدخول لمتابعة الـ SLA والطلبات",
+                portalTitle: "لوحة تحكم الخدمات الادارية", portalSubtitle: "يرجى تسجيل الدخول لمتابعة الـ SLA والطلبات",
                 lblEmail: "البريد الإلكتروني", lblPassword: "كلمة المرور", loginBtn: "تسجيل الدخول", ticketsTitle: "الطلبات (Live محدث تلقائياً)",
                 searchBy: "البحث بواسطة", fullName: "الاسم الكامل", jobTitle: "العنوان الوظيفي", governorate: "المحافظة", lblPhone: "رقم الهاتف", 
                 lblDirectManager: "المدير المباشر", confirmLogoutTitle: "تأكيد تسجيل الخروج", confirmLogoutDesc: "هل أنت متأكد من أنك تريد الخروج من الحساب الآن؟", 
@@ -990,6 +1098,7 @@
         let chartInstances = {};
 
         window.addEventListener('DOMContentLoaded', async () => {
+            setupRealtimeTickets();
             loadStoredNotifications();
             loadNotificationSettings();
             startSessionTimer();
@@ -1022,7 +1131,31 @@
                 }
             } catch (err) { console.error('Session restore error:', err.message); }
         });
-
+// دالة الاستماع التلقائي اللحظي لأي طلب جديد أو تحديث من السيرفر
+function setupRealtimeTickets() {
+    supabaseClient
+        .channel('tickets-realtime-channel')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' }, (payload) => {
+            const newTicket = payload.new;
+            if (notificationSettings.newTickets) {
+                const msg = `🔔 طلب جديد: تم إرسال طلب رقم (${newTicket.ticket_number || '#00001'}) نوع: (${newTicket.ticket_type || 'طلب'})`;
+                addNotification(msg, 'new', newTicket.ticket_number, newTicket.ticket_type, newTicket.id, true);
+            }
+            fetchTickets();
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' }, (payload) => {
+            const updated = payload.new;
+            // إذا قام شخص آخر بالتحديث وليس الحساب الحالي
+            if (updated.office_assignee_id !== currentUserProfile.id) {
+                if (notificationSettings.statusUpdates) {
+                    const msg = `🔔 تحديث طلب: تغيرت حالة الطلب (${updated.ticket_number || ''}) إلى [${updated.status}]`;
+                    addNotification(msg, 'status', updated.ticket_number, updated.ticket_type, updated.id, true);
+                }
+            }
+            fetchTickets();
+        })
+        .subscribe();
+}
         function initGrafanaCharts() {
             const chartConfigs = [
                 { id: 'chartProcCanvas', valId: 'valChartProc', color: '#9333ea' },
@@ -1059,7 +1192,7 @@
             });
         }
 
-       function updateGrafanaCharts(tickets) {
+        function updateGrafanaCharts(tickets) {
             const total = tickets.length;
             const pending = tickets.filter(t => (t.status === 'جديد' || t.status === 'New' || !t.status)).length;
             const proc = tickets.filter(t => (t.status === 'قيد المعالجة' || t.status === 'Processing')).length;
@@ -1125,57 +1258,45 @@
             applyFilters();
         }
 
-      // ==========================================
-// آلية حساب وقت تواجد الموظف اليومي (لا تتصفر بالـ Refresh)
-// ==========================================
-
-function getTodayKey() {
-    const today = new Date();
-    // إرجاع تاريخ اليوم بصيغة YYYY-MM-DD لتمييز كل يوم عن الآخر
-    return `user_active_seconds_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-}
-
-function startSessionTimer() {
-    const todayKey = getTodayKey();
-    
-    // 1. تنظيف البيانات السابقة للأيام القديمة لحفظ مساحة التخزين المحلية
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('user_active_seconds_') && key !== todayKey) {
-            localStorage.removeItem(key);
-        }
-    }
-
-    // 2. قراءة الثواني المجمعة مسبقاً لهذا اليوم، وإن لم تكن موجودة تبدأ من 0
-    let totalSecondsToday = parseInt(localStorage.getItem(todayKey)) || 0;
-
-    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-
-    sessionTimerInterval = setInterval(() => {
-        // التحقق مما إذا عبرت الساعة 11:59 مساءً ودخل يوم جديد أثناء فتح الصفحة
-        const currentTodayKey = getTodayKey();
-        if (currentTodayKey !== todayKey) {
-            // إعادة استدعاء العداد ليبدأ من صفر لليوم الجديد
-            startSessionTimer();
-            return;
+        function getTodayKey() {
+            const today = new Date();
+            return `user_active_seconds_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         }
 
-        // زيادة ثانية وتحديث التخزين الداخلي
-        totalSecondsToday++;
-        localStorage.setItem(todayKey, totalSecondsToday);
+        function startSessionTimer() {
+            const todayKey = getTodayKey();
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('user_active_seconds_') && key !== todayKey) {
+                    localStorage.removeItem(key);
+                }
+            }
 
-        // تحويل الثواني إلى ثواني، دقائق، وساعات
-        const hrs = String(Math.floor(totalSecondsToday / 3600)).padStart(2, '0');
-        const mins = String(Math.floor((totalSecondsToday % 3600) / 60)).padStart(2, '0');
-        const secs = String(totalSecondsToday % 60).padStart(2, '0');
+            let totalSecondsToday = parseInt(localStorage.getItem(todayKey)) || 0;
 
-        // تحديث العنصر في الهيدر
-        const timerElem = document.getElementById('sessionTimerBadge');
-        if (timerElem) {
-            timerElem.innerText = `${hrs}:${mins}:${secs}`;
+            if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+
+            sessionTimerInterval = setInterval(() => {
+                const currentTodayKey = getTodayKey();
+                if (currentTodayKey !== todayKey) {
+                    startSessionTimer();
+                    return;
+                }
+
+                totalSecondsToday++;
+                localStorage.setItem(todayKey, totalSecondsToday);
+
+                const hrs = String(Math.floor(totalSecondsToday / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((totalSecondsToday % 3600) / 60)).padStart(2, '0');
+                const secs = String(totalSecondsToday % 60).padStart(2, '0');
+
+                const timerElem = document.getElementById('sessionTimerBadge');
+                if (timerElem) {
+                    timerElem.innerText = `${hrs}:${mins}:${secs}`;
+                }
+            }, 1000);
         }
-    }, 1000);
-}
 
         function switchSidebarView(view) {
             const mainView = document.getElementById('sidebarMainView');
@@ -1300,15 +1421,59 @@ function startSessionTimer() {
             });
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedEmail = localStorage.getItem('sana_saved_email');
+            if (savedEmail) {
+                const emailInput = document.getElementById('loginEmail');
+                const rememberInput = document.getElementById('rememberMe');
+                if (emailInput) emailInput.value = savedEmail;
+                if (rememberInput) rememberInput.checked = true;
+            }
+        });
+
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            let isValid = true;
+
+            emailError.classList.add('hidden');
+            passwordError.classList.add('hidden');
+            emailInput.classList.remove('border-rose-500');
+            passwordInput.classList.remove('border-rose-500');
+
+            if (!emailInput.value.trim()) {
+                emailError.classList.remove('hidden');
+                emailInput.classList.add('border-rose-500');
+                isValid = false;
+            }
+
+            if (!passwordInput.value.trim()) {
+                passwordError.classList.remove('hidden');
+                passwordInput.classList.add('border-rose-500');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
 
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 
+                if (rememberMe) {
+                    localStorage.setItem('sana_saved_email', email);
+                } else {
+                    localStorage.removeItem('sana_saved_email');
+                }
+
                 const user = data.user;
                 currentUserProfile.id = user.id;
                 currentUserProfile.email = user.email;
@@ -1340,7 +1505,7 @@ function startSessionTimer() {
             const eye = document.getElementById('passEyeIcon');
             if (input.type === 'password') {
                 input.type = 'text';
-                eye.innerText = '🙈';
+                eye.innerText = '🧱​';
             } else {
                 input.type = 'password';
                 eye.innerText = '👁️';
@@ -1383,7 +1548,6 @@ function startSessionTimer() {
                 return; 
             }
             try {
-                // جلب بيانات البروفايل بناءً على الـ ID الخاص بالحساب الثاني
                 const { data: profile, error } = await supabaseClient
                     .from('profiles')
                     .select('*')
@@ -1414,8 +1578,329 @@ function startSessionTimer() {
             }
         }
 
-        function closeUserProfileModal() { document.getElementById('userProfileModal').classList.add('hidden'); }
+        function closeUserProfileModal() { 
+            document.getElementById('userProfileModal').classList.add('hidden'); 
+        }
 
+        /* ========================================================
+           دوال إدارة ورفع وعرض ملفات التخزين (Supabase Storage: ticket-files)
+           ======================================================== */
+
+        // 1. جلب وعرض الملفات المرفوعة للطلب مباشرة من الباكت
+       async function loadTicketFiles(ticketId) {
+    const listContainer = document.getElementById('uploadedFilesList');
+    if (!listContainer) return;
+    listContainer.innerHTML = '<div class="text-slate-400 text-xs text-center py-2">جاري جلب الملفات...</div>';
+    try {
+        const { data: files, error } = await supabaseClient
+            .storage
+            .from('ticket-files')
+            .list(`${ticketId}`, { 
+                limit: 100, 
+                sortBy: { column: 'created_at', order: 'desc' } 
+            });
+        if (error) throw error;
+        const validFiles = (files || []).filter(f => f.name && f.name !== '.emptyFolderPlaceholder');
+        if (validFiles.length === 0) {
+            listContainer.innerHTML = '<div class="text-slate-400 text-xs text-center py-2.5 bg-slate-100 dark:bg-slate-800/40 rounded-xl">لا توجد ملفات مرفوعة لهذا الطلب بعد.</div>';
+            return;
+        }
+        listContainer.innerHTML = validFiles.map(file => {
+            const { data: publicUrlData } = supabaseClient
+                .storage
+                .from('ticket-files')
+                .getPublicUrl(`${ticketId}/${file.name}`);
+            const fileUrl = publicUrlData?.publicUrl || '#';
+            const displayName = file.name.includes('_') ? file.name.substring(file.name.indexOf('_') + 1) : file.name;
+            const fileSize = file.metadata?.size ? `(${(file.metadata.size / 1024).toFixed(1)} KB)` : '';
+            const fileDate = file.created_at ? formatDateTime(file.created_at) : '';
+            return `
+                <div onclick="triggerFileDownload('${fileUrl}', '${displayName}')" 
+                     title="اضغط لتحميل الملف مباشرة إلى جهازك"
+                     class="group bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 hover:border-[#3A6B68] dark:hover:border-[#4B8581] p-3 rounded-xl flex flex-col gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer">
+                    
+                    <!-- الجزء العلوي: بيانات الملف + لوقو التحميل جهة اليسار -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 overflow-hidden">
+                            <span class="text-base p-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-lg">📄</span>
+                            <div class="flex flex-col truncate">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate group-hover:text-[#3A6B68] dark:group-hover:text-[#4B8581] transition">
+                                    ${displayName}
+                                </span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">
+                                    ${fileDate} ${fileSize}
+                                </span>
+                            </div>
+                        </div>
+                        <!-- لوقو التحميل فقط على اليسار -->
+                        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700/50 group-hover:bg-[#3A6B68] group-hover:text-white transition text-slate-600 dark:text-slate-300 shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <!-- خيار الحذف أسفل الملف لموظف الباك أوفيس -->
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700/50" onclick="event.stopPropagation()">
+                        <span class="text-[10px] text-slate-400 font-semibold">مرفق الطلب</span>
+                        <button type="button" 
+                                onclick="deleteTicketFile('${ticketId}', '${file.name}', event)" 
+                                class="flex items-center gap-1 text-[11px] font-bold text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 hover:underline transition">
+                            <span>🗑️</span> <span>حذف الملف</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('فشل تحميل الملفات:', err);
+        listContainer.innerHTML = `
+            <div class="text-rose-500 text-xs text-center py-2 bg-rose-50 dark:bg-rose-950/30 rounded-lg border border-rose-200 dark:border-rose-900">
+                تعذر تحميل الملفات (${err.message || 'خطأ في جلب البيانات'})
+            </div>
+        `;
+    }
+}
+// 2. دالة تنزيل الملف المباشر إلى جهاز المستخدم فور الضغط
+async function triggerFileDownload(url, fileName) {
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileName || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+        // بديل في حال وجود قيود CORS
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName || 'download';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+}
+// 3. دالة حذف الملف من سلة التخزين للباك أوفيس
+async function deleteTicketFile(ticketId, fullFileName, event) {
+    if (event) event.stopPropagation();
+    const confirmed = confirm('هل أنت متأكد من رغبتك في حذف هذا الملف نهائياً؟');
+    if (!confirmed) return;
+    try {
+        const filePath = `${ticketId}/${fullFileName}`;
+        const { error } = await supabaseClient
+            .storage
+            .from('ticket-files')
+            .remove([filePath]);
+        if (error) throw error;
+        alert('✅ تم حذف الملف بنجاح!');
+        // إعادة تحميل سجل الملفات فوراً
+        await loadTicketFiles(ticketId);
+    } catch (err) {
+        console.error('خطأ في حذف الملف:', err);
+        alert('حدث خطأ أثناء محاولة حذف الملف: ' + err.message);
+    }
+}
+
+        // 2. معالجة وتمرير الملف المرفوع وتخزينه في الباكت
+       async function handleFileSelected(file) {
+    if (!file) return;
+    const activeTicketId = document.getElementById('activeTicketId')?.value;
+    const fileDisplaySpan = document.getElementById('selectedFileName');
+    if (!activeTicketId) {
+        alert('يرجى التأكد من اختيار طلب صالح قبل الرفع.');
+        return;
+    }
+    if (fileDisplaySpan) {
+        fileDisplaySpan.innerText = `جاري رفع "${file.name}"... ⏳`;
+        fileDisplaySpan.className = 'text-[11px] text-[#3A6B68] font-bold block mt-1';
+    }
+    try {
+        // تنظيف اسم الملف
+        const cleanName = file.name.replace(/\s+/g, '_');
+        // جلب اسم المستخدم الحالي وتشفيره داخل اسم الملف لحفظه بدون داتابيز إضافية
+        const currentUserName = currentUserProfile?.name || 'مستخدم النظام';
+        const encodedUser = encodeURIComponent(currentUserName);
+        
+        // صيغة الحفظ: وقت_الرفع__اسم_المستخدم__اسم_الملف
+        const uniqueFileName = `${Date.now()}__${encodedUser}__${cleanName}`;
+        const filePath = `${activeTicketId}/${uniqueFileName}`;
+        const { data, error } = await supabaseClient
+            .storage
+            .from('ticket-files')
+            .upload(filePath, file, { 
+                cacheControl: '3600',
+                upsert: true 
+            });
+        if (error) throw error;
+        if (fileDisplaySpan) {
+            fileDisplaySpan.innerText = `✅ تم رفع "${file.name}" بنجاح!`;
+            setTimeout(() => {
+                if (fileDisplaySpan) fileDisplaySpan.innerText = '';
+            }, 3500);
+        }
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) fileInput.value = '';
+        // تحديث سجل الملفات فوراً
+        await loadTicketFiles(activeTicketId);
+    } catch (err) {
+        console.error('Upload Error:', err);
+        if (fileDisplaySpan) {
+            fileDisplaySpan.innerText = `❌ فشل الرفع: ${err.message}`;
+            fileDisplaySpan.className = 'text-[11px] text-rose-500 font-bold block mt-1';
+        }
+        alert('فشل رفع الملف: ' + err.message);
+    }
+}
+// 2. دالة جلب وعرض الملفات مع إظهار اسم الرافع الحقيقي وخيار الحذف والتحميل
+async function loadTicketFiles(ticketId) {
+    const listContainer = document.getElementById('uploadedFilesList');
+    if (!listContainer) return;
+    listContainer.innerHTML = '<div class="text-slate-400 text-xs text-center py-2">جاري جلب الملفات...</div>';
+    try {
+        const { data: files, error } = await supabaseClient
+            .storage
+            .from('ticket-files')
+            .list(`${ticketId}`, { 
+                limit: 100, 
+                sortBy: { column: 'created_at', order: 'desc' } 
+            });
+        if (error) throw error;
+        const validFiles = (files || []).filter(f => f.name && f.name !== '.emptyFolderPlaceholder');
+        if (validFiles.length === 0) {
+            listContainer.innerHTML = '<div class="text-slate-500 dark:text-slate-400 text-xs text-center py-2.5 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-[#3A6B68]/20">لا توجد ملفات مرفوعة لهذا الطلب بعد.</div>';
+            return;
+        }
+        listContainer.innerHTML = validFiles.map(file => {
+            const { data: publicUrlData } = supabaseClient
+                .storage
+                .from('ticket-files')
+                .getPublicUrl(`${ticketId}/${file.name}`);
+            const fileUrl = publicUrlData?.publicUrl || '#';
+            // استخراج اسم الرافع واسم الملف الأصلي
+            let uploaderName = currentUserProfile?.name || 'مستخدم النظام';
+            let displayName = file.name;
+            if (file.name.includes('__')) {
+                const parts = file.name.split('__');
+                if (parts.length >= 3) {
+                    try {
+                        uploaderName = decodeURIComponent(parts[1]);
+                        displayName = parts.slice(2).join('__');
+                    } catch(e) {
+                        displayName = parts[parts.length - 1];
+                    }
+                }
+            } else if (file.name.includes('_')) {
+                displayName = file.name.substring(file.name.indexOf('_') + 1);
+            }
+            const fileSize = file.metadata?.size ? `(${(file.metadata.size / 1024).toFixed(1)} KB)` : '';
+            const fileDate = file.created_at ? formatDateTime(file.created_at) : '';
+            return `
+                <div onclick="triggerFileDownload('${fileUrl}', '${displayName}')" 
+                     title="اضغط على المستطيل لتحميل الملف مباشرة إلى جهازك"
+                     class="group bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-[#3A6B68] dark:hover:border-[#4B8581] p-3 rounded-xl flex flex-col gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer">
+                    
+                    <!-- الجزء العلوي: بيانات الملف + لوقو التحميل جهة اليسار -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 overflow-hidden">
+                            <span class="text-base p-1.5 bg-[#3A6B68]/10 dark:bg-[#3A6B68]/20 rounded-lg text-[#3A6B68]">📄</span>
+                            <div class="flex flex-col truncate">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate group-hover:text-[#3A6B68] dark:group-hover:text-[#4B8581] transition">
+                                    ${displayName}
+                                </span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">
+                                    ${fileDate} ${fileSize}
+                                </span>
+                            </div>
+                        </div>
+                        <!-- لوقو التحميل على اليسار -->
+                        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-[#3A6B68] group-hover:text-white transition text-slate-600 dark:text-slate-300 shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <!-- الجزء السفلي: اسم المستخدم الذي رفع الملف + زر الحذف -->
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800" onclick="event.stopPropagation()">
+                        <span class="text-[11px] font-bold text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-1">
+                            <span>👤</span> <span>: ${uploaderName}</span>
+                        </span>
+                        
+                        <button type="button" 
+                                onclick="deleteTicketFile('${ticketId}', '${file.name}', event)" 
+                                class="flex items-center gap-1 text-[11px] font-bold text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 hover:underline transition bg-rose-500/10 px-2.5 py-1 rounded-lg">
+                            <span>🗑️</span> <span>حذف</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('فشل تحميل الملفات:', err);
+        listContainer.innerHTML = `
+            <div class="text-rose-500 text-xs text-center py-2 bg-rose-50 dark:bg-rose-950/30 rounded-lg border border-rose-200 dark:border-rose-900">
+                تعذر تحميل الملفات (${err.message || 'خطأ في جلب البيانات'})
+            </div>
+        `;
+    }
+}
+// 3. دالة تنزيل الملف المباشر إلى جهاز المستخدم
+async function triggerFileDownload(url, fileName) {
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileName || 'download';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName || 'download';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+}
+// 4. دالة حذف الملف مع التأكيد ومعالجة مسار السيرفر بدقة
+async function deleteTicketFile(ticketId, fileName, event) {
+    if (event) event.stopPropagation();
+    const confirmed = confirm('هل أنت متأكد من رغبتك في حذف هذا الملف نهائياً؟');
+    if (!confirmed) return;
+    try {
+        const fullPath = `${ticketId}/${fileName}`;
+        
+        const { data, error } = await supabaseClient
+            .storage
+            .from('ticket-files')
+            .remove([fullPath]);
+        if (error) throw error;
+        // في حال نجاح الحذف من Supabase
+        alert('✅ تم حذف الملف بنجاح!');
+        await loadTicketFiles(ticketId);
+    } catch (err) {
+        console.error('خطأ في حذف الملف:', err);
+        alert('تعذر حذف الملف: ' + (err.message || 'تأكد من تفعيل صلاحية DELETE للباكت في Supabase'));
+    }
+}
+// 5. معالجة الإفلات المباشر (Drag & Drop)
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-[#3A6B68]', 'bg-[#3A6B68]/20');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFileSelected(e.dataTransfer.files[0]);
+    }
+}
+
+        // فتح نافذة تفاصيل الطلب وتعبئة الحقول
         async function openTicketDetailModal(ticketId) {
             const ticket = allFetchedTickets.find(t => t.id == ticketId);
             if (!ticket) return;
@@ -1434,10 +1919,11 @@ function startSessionTimer() {
             const notesInput = document.getElementById('dtModalNotes');
             const processInput = document.getElementById('dtModalProcess');
             const newOpt = document.getElementById('optNewStatusOption');
+            const fileStatusSpan = document.getElementById('selectedFileName');
 
+            if (fileStatusSpan) fileStatusSpan.innerText = '';
             statusSelect.value = ticket.status || 'جديد';
             notesInput.value = '';
-            document.getElementById('selectedFileName').innerText = ticket.file_url ? 'ملف مرفق مسبقاً' : '';
 
             const isClosed = (ticket.status === 'مكتملة' || ticket.status === 'مكتمل' || ticket.status === 'ملغي' || ticket.status === 'Canceled');
             
@@ -1473,61 +1959,49 @@ function startSessionTimer() {
             }
 
             renderHistoryLogs(ticket);
+            loadTicketFiles(ticket.id);
             document.getElementById('ticketDetailModal').classList.remove('hidden');
         }
 
-     function renderHistoryLogs(ticket) {
-    const container = document.getElementById('historyLogsContainer');
-    const logs = ticket.history_logs || [];
-    
-    const allEvents = [...logs];
-    
-    if (ticket.created_at) {
-        allEvents.push({
-            timestamp: ticket.created_at,
-            author: ticket.sender_name || ticket.user_name || 'مشرف الميدان',
-            author_id: ticket.sender_id || ticket.user_id || null,
-            action: 'إنشاء الطلب وإرساله',
-            isCreation: true
-        });
-    }
+        function renderHistoryLogs(ticket) {
+            const container = document.getElementById('historyLogsContainer');
+            const logs = ticket.history_logs || [];
+            
+            const allEvents = [...logs];
+            
+            if (ticket.created_at) {
+                allEvents.push({
+                    timestamp: ticket.created_at,
+                    author: ticket.sender_name || ticket.user_name || 'مشرف الميدان',
+                    author_id: ticket.sender_id || ticket.user_id || null,
+                    action: 'إنشاء الطلب وإرساله',
+                    isCreation: true
+                });
+            }
 
-    if (allEvents.length === 0) {
-        container.innerHTML = `<div class="text-slate-500 text-center py-2">${translations[currentLang].noLogs}</div>`;
-        return;
-    }
+            if (allEvents.length === 0) {
+                container.innerHTML = `<div class="text-slate-500 text-center py-2">${translations[currentLang].noLogs}</div>`;
+                return;
+            }
 
-    const sortedEvents = allEvents.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            const sortedEvents = allEvents.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    container.innerHTML = sortedEvents.map(log => `
-        <div class="p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl space-y-1 shadow-sm">
-            <div class="flex justify-between items-center text-[11px]">
-                <button type="button" onclick="openUserProfileModalById('${log.author_id || ''}')" class="font-black text-[#3A6B68] dark:text-[#4B8581] hover:underline cursor-pointer flex items-center gap-1">
-                    <span>👤</span> ${log.author || 'المستخدم'}
-                </button>
-                <span class="text-slate-500 dark:text-slate-400 font-mono text-[10px]">${new Date(log.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</span>
-            </div>
-            <div class="text-black dark:text-slate-200 font-bold text-xs pt-1">${log.action}</div>
-            ${log.notes ? `<div class="text-slate-600 dark:text-slate-400 italic text-[11px] bg-slate-100 dark:bg-slate-950/40 p-1.5 rounded border border-slate-200 dark:border-slate-800/50 mt-1">" ${log.notes} "</div>` : ''}
-        </div>
-    `).join('');
-}
+            container.innerHTML = sortedEvents.map(log => `
+                <div class="p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl space-y-1 shadow-sm">
+                    <div class="flex justify-between items-center text-[11px]">
+                        <button type="button" onclick="openUserProfileModalById('${log.author_id || ''}')" class="font-black text-[#3A6B68] dark:text-[#4B8581] hover:underline cursor-pointer flex items-center gap-1">
+                            <span>👤</span> ${log.author || 'المستخدم'}
+                        </button>
+                        <span class="text-slate-500 dark:text-slate-400 font-mono text-[10px]">${new Date(log.timestamp).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</span>
+                    </div>
+                    <div class="text-black dark:text-slate-200 font-bold text-xs pt-1">${log.action}</div>
+                    ${log.notes ? `<div class="text-slate-600 dark:text-slate-400 italic text-[11px] bg-slate-100 dark:bg-slate-950/40 p-1.5 rounded border border-slate-200 dark:border-slate-800/50 mt-1">" ${log.notes} "</div>` : ''}
+                </div>
+            `).join('');
+        }
 
-        function closeTicketDetailModal() { document.getElementById('ticketDetailModal').classList.add('hidden'); }
-        function handleFileSelected(file) { if (file) document.getElementById('selectedFileName').innerText = `تم اختيار الملف: ${file.name}`; }
-
-        const dropZone = document.getElementById('dropZone');
-        if (dropZone) {
-            ['dragenter', 'dragover'].forEach(evt => dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.add('border-[#3A6B68]'); }));
-            ['dragleave', 'drop'].forEach(evt => dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove('border-[#3A6B68]'); }));
-            dropZone.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    document.getElementById('fileInput').files = files;
-                    handleFileSelected(files[0]);
-                }
-            });
-            dropZone.addEventListener('click', () => document.getElementById('fileInput').click());
+        function closeTicketDetailModal() { 
+            document.getElementById('ticketDetailModal').classList.add('hidden'); 
         }
 
         async function saveAndSendTicketUpdate() {
@@ -1541,15 +2015,17 @@ function startSessionTimer() {
             const currentLogs = currentTicket ? (currentTicket.history_logs || []) : [];
 
             let fileUrl = null;
-            if (fileInput.files && fileInput.files.length > 0) fileUrl = fileInput.files[0].name; 
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                fileUrl = fileInput.files[0].name; 
+            }
 
-         const newLogEntry = {
-    timestamp: new Date().toISOString(),
-    author: currentUserProfile.name,
-    author_id: currentUserProfile.id,
-    action: `تغيير الحالة إلى: [${newStatus}]`,
-    notes: notes || ''
-};
+            const newLogEntry = {
+                timestamp: new Date().toISOString(),
+                author: currentUserProfile.name,
+                author_id: currentUserProfile.id,
+                action: `تغيير الحالة إلى: [${newStatus}]`,
+                notes: notes || ''
+            };
 
             const updatedLogs = [newLogEntry, ...currentLogs];
 
@@ -1569,59 +2045,55 @@ function startSessionTimer() {
             const { error } = await supabaseClient.from('tickets').update(updatePayload).eq('id', ticketId);
             if (!error) {
                 if (notificationSettings.statusUpdates) {
-const oldStatus = currentTicket?.status || 'سابقة';
-    const currentUserName = (typeof currentUser !== 'undefined' && (currentUser?.name || currentUser?.username)) 
-                            ? (currentUser.name || currentUser.username) 
-                            : 'مستخدم النظام';
-    const ticketNum = currentTicket?.ticket_number || '';
+                    const oldStatus = currentTicket?.status || 'سابقة';
+                    const currentUserName = currentUserProfile.name || 'مستخدم النظام';
+                    const ticketNum = currentTicket?.ticket_number || '';
 
-addNotification(
-        `تم تحديث الطلب ${ticketNum} من حالة (${oldStatus}) إلى حالة (${newStatus}) بواسطة (${currentUserName})`, 'status', ticketNum, currentTicket?.ticket_type, ticketId);
-    }
+                    addNotification(
+                        `تم تحديث الطلب ${ticketNum} من حالة (${oldStatus}) إلى حالة (${newStatus}) بواسطة (${currentUserName})`, 'status', ticketNum, currentTicket?.ticket_type, ticketId
+                    );
+                }
                 alert('تم تحديث الطلب وحفظ البيانات في السجل بنجاح!');
                 closeTicketDetailModal();
                 fetchTickets();
-            } else { alert('خطأ أثناء التحديث: ' + error.message); }
+            } else { 
+                alert('خطأ أثناء التحديث: ' + error.message); 
+            }
         }
 
         function formatSlaDuration(targetDate, isCompleted, completedAtDate) {
-    const due = new Date(targetDate);
-    
-    // إذا كان الطلب مكتمل ومغلق
-    if (isCompleted) {
-        // نتحقق مما إذا كان الإكمال قد تم بعد تاريخ الـ SLA المحدد
-        const finishTime = completedAtDate ? new Date(completedAtDate) : new Date();
-        const diffMs = due - finishTime;
-        
-        // إذا كان الإكمال متأخراً عن الوقت المسموح
-        if (diffMs < 0) {
+            const due = new Date(targetDate);
+            
+            if (isCompleted) {
+                const finishTime = completedAtDate ? new Date(completedAtDate) : new Date();
+                const diffMs = due - finishTime;
+                
+                if (diffMs < 0) {
+                    const absMs = Math.abs(diffMs);
+                    const totalMinutes = Math.floor(absMs / (1000 * 60));
+                    const hours = Math.floor(totalMinutes / 60);
+                    const minutes = totalMinutes % 60;
+                    return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
+                } else {
+                    return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs">${currentLang === 'ar' ? 'تم الانجاز' : 'Done'}</span>`;
+                }
+            }
+
+            const now = new Date();
+            const diffMs = due - now;
+            const isLate = diffMs < 0;
             const absMs = Math.abs(diffMs);
+
             const totalMinutes = Math.floor(absMs / (1000 * 60));
             const hours = Math.floor(totalMinutes / 60);
             const minutes = totalMinutes % 60;
-            return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
-        } else {
-            // إذا اكتمل ضمن الوقت المسموح
-            return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs">${currentLang === 'ar' ? 'تم الانجاز' : 'Done'}</span>`;
+
+            if (isLate) {
+                return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
+            } else {
+                return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs">متبقي ${hours}س و ${minutes}د</span>`;
+            }
         }
-    }
-
-    // إذا كان الطلب لا يزال مفتوحاً وقيد المعالجة/الانتظار
-    const now = new Date();
-    const diffMs = due - now;
-    const isLate = diffMs < 0;
-    const absMs = Math.abs(diffMs);
-
-    const totalMinutes = Math.floor(absMs / (1000 * 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    if (isLate) {
-        return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
-    } else {
-        return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs">متبقي ${hours}س و ${minutes}د</span>`;
-    }
-}
 
         function formatDateTime(dateStr) {
             if (!dateStr) return '-';
@@ -1638,137 +2110,169 @@ addNotification(
             });
         }
 
-function renderTicketsTable(tickets) {
-    const tbody = document.getElementById('ticketsTableBody');
-    document.getElementById('totalTicketsCountBadge').innerText = tickets.length;
-
-    if (!tickets || tickets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-500 font-bold">${translations[currentLang].noNotifications}</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = tickets.map(ticket => {
-        const now = new Date();
-        const dueDate = ticket.due_at || ticket.created_at || now;
-        const isCompleted = ticket.status === 'مكتملة' || ticket.status === 'مكتمل';
-
-        // 1. حساب الموظف المستقبل (عامود 11): أول أكشن بعد إنشاء الطلب ويبقى ثابتاً
-        let receiverName = '-';
-        let receiverId = '';
-        const logs = ticket.history_logs || [];
-        
-        // فرز الأحداث زمنياً من الأقدم للأحدث للبحث عن أول أكشن أوفيس
-        const sortedAscLogs = [...logs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        if (sortedAscLogs.length > 0) {
-            receiverName = sortedAscLogs[0].author || sortedAscLogs[0].user_name || '-';
-            receiverId = sortedAscLogs[0].author_id || sortedAscLogs[0].user_id || '';
-        } else if (ticket.office_assignee_name) {
-            receiverName = ticket.office_assignee_name;
-            receiverId = ticket.office_assignee_id || '';
+        function toggleStatusDropdown(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('statusDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
         }
 
-        // 2. حساب الحساب المنجز/صاحب آخر أكشن (عامود 12): يحدث باستمرار حسب أحدث أكشن
-        let lastActionName = '-';
-        let lastActionId = '';
-        const sortedDescLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        if (sortedDescLogs.length > 0) {
-            lastActionName = sortedDescLogs[0].author || sortedDescLogs[0].user_name || '-';
-            lastActionId = sortedDescLogs[0].author_id || sortedDescLogs[0].user_id || '';
-        } else if (ticket.office_assignee_name) {
-            lastActionName = ticket.office_assignee_name;
-            lastActionId = ticket.office_assignee_id || '';
-        } else if (ticket.sender_name) {
-            lastActionName = ticket.sender_name;
-            lastActionId = ticket.sender_id || '';
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('statusDropdownBtn');
+            const menu = document.getElementById('statusDropdownMenu');
+            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function handleStatusCheckboxChange(changedCheckbox) {
+            const checkboxes = document.querySelectorAll('.status-checkbox');
+            const allCheckbox = document.querySelector('.status-checkbox[value="ALL"]');
+
+            if (changedCheckbox.value === 'ALL') {
+                if (changedCheckbox.checked) {
+                    checkboxes.forEach(cb => { if (cb.value !== 'ALL') cb.checked = false; });
+                }
+            } else {
+                if (changedCheckbox.checked && allCheckbox) {
+                    allCheckbox.checked = false;
+                }
+            }
+
+            const checkedBoxes = document.querySelectorAll('.status-checkbox:checked');
+            if (checkedBoxes.length === 0 && allCheckbox) {
+                allCheckbox.checked = true;
+            }
+
+            updateStatusTextDisplay();
+
+            if (typeof applyFilters === 'function') {
+                applyFilters();
+            }
         }
 
-        return `
-            <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer font-semibold border-b border-slate-200 dark:border-slate-800" onclick="openTicketDetailModal('${ticket.id}')">
-                <!-- 1. رقم الطلب -->
-                <td class="p-3 text-right font-bold text-[#3A6B68] dark:text-[#4B8581]">
-                    ${ticket.ticket_number || '#00001'}
-                </td>
+        function updateStatusTextDisplay() {
+            const checkedBoxes = Array.from(document.querySelectorAll('.status-checkbox:checked'));
+            const textSpan = document.getElementById('selectedStatusText');
 
-                <!-- 2. تاريخ الإنشاء -->
-                <td class="p-3 text-right font-mono text-xs">
-                    ${formatDateTime(ticket.created_at)}
-                </td>
+            if (!textSpan) return;
 
-                <!-- 3. المرسل -->
-                <td class="p-3 text-right" onclick="event.stopPropagation()">
-                    <button type="button" onclick="openUserProfileModalById('${ticket.sender_id || ticket.user_id || ''}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
-                        <span>👤</span> ${ticket.sender_name || ticket.user_name || 'مرسل غير معروف'}
-                    </button>
-                </td>
+            if (checkedBoxes.length === 0 || checkedBoxes.some(cb => cb.value === 'ALL')) {
+                textSpan.innerText = 'الكل مسبقاً';
+            } else if (checkedBoxes.length === 1) {
+                const label = checkedBoxes[0].nextElementSibling;
+                textSpan.innerText = label ? label.innerText : checkedBoxes[0].value;
+            } else {
+                textSpan.innerText = `تم تحديد (${checkedBoxes.length})`;
+            }
+        }
 
-                <!-- 4. نوع الطلب -->
-                <td class="p-3 text-right font-bold">
-                    ${ticket.ticket_type || ticket.type || '-'}
-                </td>
+        function renderTicketsTable(tickets) {
+            const tbody = document.getElementById('ticketsTableBody');
+            document.getElementById('totalTicketsCountBadge').innerText = tickets.length;
 
-                <!-- 5. رقم البروسس -->
-                <td class="p-3 text-right font-mono font-bold">
-                    ${ticket.process_number || '-'}
-                </td>
+            if (!tickets || tickets.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-500 font-bold">${translations[currentLang].noNotifications}</td></tr>`;
+                return;
+            }
 
-                <!-- 6. عنوان الزون -->
-                <td class="p-3 text-right">
-                    ${ticket.zone_address || ticket.zone_name || '-'}
-                </td>
+            tbody.innerHTML = tickets.map(ticket => {
+                const now = new Date();
+                const dueDate = ticket.due_at || ticket.created_at || now;
+                const isCompleted = ticket.status === 'مكتملة' || ticket.status === 'مكتمل';
 
-                <!-- 7. المحافظة -->
-                <td class="p-3 text-right font-bold">
-                    ${ticket.governorate || ticket.city || '-'}
-                </td>
+                let receiverName = '-';
+                let receiverId = '';
+                const logs = ticket.history_logs || [];
+                
+                const sortedAscLogs = [...logs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                if (sortedAscLogs.length > 0) {
+                    receiverName = sortedAscLogs[0].author || sortedAscLogs[0].user_name || '-';
+                    receiverId = sortedAscLogs[0].author_id || sortedAscLogs[0].user_id || '';
+                } else if (ticket.office_assignee_name) {
+                    receiverName = ticket.office_assignee_name;
+                    receiverId = ticket.office_assignee_id || '';
+                }
 
-                <!-- 8. وقت SLA -->
-                <td class="p-3 text-right">
-                    ${formatSlaDuration(dueDate, isCompleted, ticket.completed_at)}
-                </td>
+                let lastActionName = '-';
+                let lastActionId = '';
+                const sortedDescLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (sortedDescLogs.length > 0) {
+                    lastActionName = sortedDescLogs[0].author || sortedDescLogs[0].user_name || '-';
+                    lastActionId = sortedDescLogs[0].author_id || sortedDescLogs[0].user_id || '';
+                } else if (ticket.office_assignee_name) {
+                    lastActionName = ticket.office_assignee_name;
+                    lastActionId = ticket.office_assignee_id || '';
+                } else if (ticket.sender_name) {
+                    lastActionName = ticket.sender_name;
+                    lastActionId = ticket.sender_id || '';
+                }
 
-                <!-- 9. حالة الطلب -->
-                <td class="p-3 text-right">
-                    <span class="px-2.5 py-1 rounded-xl text-xs font-black ${
-                        ticket.status === 'جديد' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-500/30' :
-                        ticket.status === 'قيد المعالجة' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30' :
-                        ticket.status === 'معلق' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30' :
-                        ticket.status === 'ملغي' ? 'bg-pink-500/20 text-pink-700 dark:text-pink-400 border border-pink-500/30' :
-                        ticket.status === 'يحتاج تعديل' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30' :
-                        (ticket.status === 'مكتملة' || ticket.status === 'مكتمل') ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30' :
-                        'bg-slate-200 text-slate-800'
-                    }">
-                        ${ticket.status || 'جديد'}
-                    </span>
-                </td>
+                return `
+                    <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer font-semibold border-b border-slate-200 dark:border-slate-800" onclick="openTicketDetailModal('${ticket.id}')">
+                        <td class="p-3 text-right font-bold text-[#3A6B68] dark:text-[#4B8581]">
+                            ${ticket.ticket_number || '#00001'}
+                        </td>
+                        <td class="p-3 text-right font-mono text-xs">
+                            ${formatDateTime(ticket.created_at)}
+                        </td>
+                        <td class="p-3 text-right" onclick="event.stopPropagation()">
+                            <button type="button" onclick="openUserProfileModalById('${ticket.sender_id || ticket.user_id || ''}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
+                                <span>👤</span> ${ticket.sender_name || ticket.user_name || 'مرسل غير معروف'}
+                            </button>
+                        </td>
+                        <td class="p-3 text-right font-bold">
+                            ${ticket.ticket_type || ticket.type || '-'}
+                        </td>
+                        <td class="p-3 text-right font-mono font-bold">
+                            ${ticket.process_number || '-'}
+                        </td>
+                        <td class="p-3 text-right">
+                            ${ticket.zone_address || ticket.zone_name || '-'}
+                        </td>
+                        <td class="p-3 text-right font-bold">
+                            ${ticket.governorate || ticket.city || '-'}
+                        </td>
+                        <td class="p-3 text-right">
+                            ${formatSlaDuration(dueDate, isCompleted, ticket.completed_at)}
+                        </td>
+                        <td class="p-3 text-right">
+                            <span class="px-2.5 py-1 rounded-xl text-xs font-black ${
+                                ticket.status === 'جديد' ? 'bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-500/30' :
+                                ticket.status === 'قيد المعالجة' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30' :
+                                ticket.status === 'معلق' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30' :
+                                ticket.status === 'ملغي' ? 'bg-pink-500/20 text-pink-700 dark:text-pink-400 border border-pink-500/30' :
+                                ticket.status === 'يحتاج تعديل' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30' :
+                                (ticket.status === 'مكتملة' || ticket.status === 'مكتمل') ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30' :
+                                'bg-slate-200 text-slate-800'
+                            }">
+                                ${ticket.status || 'جديد'}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right font-mono text-xs">
+                            ${formatDateTime(ticket.updated_at || ticket.created_at)}
+                        </td>
+                        <td class="p-3 text-right" onclick="event.stopPropagation()">
+                            ${receiverName !== '-' ? `
+                                <button type="button" onclick="openUserProfileModalById('${receiverId}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
+                                    <span>👤</span> ${receiverName}
+                                </button>
+                            ` : '<span class="text-slate-400 font-bold">-</span>'}
+                        </td>
+                        <td class="p-3 text-right" onclick="event.stopPropagation()">
+                            ${lastActionName !== '-' ? `
+                                <button type="button" onclick="openUserProfileModalById('${lastActionId}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
+                                    <span>👤</span> ${lastActionName}
+                                </button>
+                            ` : '<span class="text-slate-400 font-bold">-</span>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
 
-                <!-- 10. آخر تحديث -->
-                <td class="p-3 text-right font-mono text-xs">
-                    ${formatDateTime(ticket.updated_at || ticket.created_at)}
-                </td>
-
-                <!-- 11. الموظف المستقبل (أول أكشن أوفيس - ثابت) -->
-                <td class="p-3 text-right" onclick="event.stopPropagation()">
-                    ${receiverName !== '-' ? `
-                        <button type="button" onclick="openUserProfileModalById('${receiverId}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
-                            <span>👤</span> ${receiverName}
-                        </button>
-                    ` : '<span class="text-slate-400 font-bold">-</span>'}
-                </td>
-
-                <!-- 12. الحساب المنجز للطلب (صاحب آخر أكشن - يحدث باستمرار) -->
-                <td class="p-3 text-right" onclick="event.stopPropagation()">
-                    ${lastActionName !== '-' ? `
-                        <button type="button" onclick="openUserProfileModalById('${lastActionId}')" class="font-bold text-slate-800 dark:text-slate-200 hover:text-[#3A6B68] hover:underline flex items-center gap-1">
-                            <span>👤</span> ${lastActionName}
-                        </button>
-                    ` : '<span class="text-slate-400 font-bold">-</span>'}
-                </td>
-            </tr>
-        `;
-    }).join('');
-
-
-updateGrafanaCharts(tickets);        }
+            updateGrafanaCharts(tickets);
+        }
 
         async function fetchTickets() {
             try {
@@ -1782,6 +2286,8 @@ updateGrafanaCharts(tickets);        }
         }
 
         function applyFilters() {
+            const selectedCheckboxes = Array.from(document.querySelectorAll('.status-checkbox:checked'));
+            const selectedStatuses = selectedCheckboxes.map(cb => cb.value);
             const ticketNumQuery = document.getElementById('searchTicketNumInput')?.value.trim().toLowerCase() || '';
             const zoneNameQuery = document.getElementById('searchNameInput')?.value.trim().toLowerCase() || '';
             const typeQuery = document.getElementById('searchTypeInput')?.value.trim().toLowerCase() || '';
@@ -1806,7 +2312,7 @@ updateGrafanaCharts(tickets);        }
                 const matchesSender = !senderQuery || sName.includes(senderQuery);
                 const matchesAssignee = !assigneeQuery || aName.includes(assigneeQuery);
                 
-                let matchesStatus = true;
+                let matchesStatus = selectedStatuses.includes('ALL') || selectedStatuses.includes(ticket.status);             
                 if (statusSelect !== 'ALL') {
                     matchesStatus = (tStatus === statusSelect);
                 }
@@ -1902,32 +2408,109 @@ updateGrafanaCharts(tickets);        }
             location.reload();
         }
 
-        function openChangePasswordModal() {
-            document.getElementById('changePasswordModal').classList.remove('hidden');
-        }
+       function openChangePasswordModal() {
+    const newPass = document.getElementById('newPasswordInput');
+    const confirmPass = document.getElementById('confirmPasswordInput');
+    const msg = document.getElementById('passChangeMsg');
+    
+    if (newPass) newPass.value = '';
+    if (confirmPass) confirmPass.value = '';
+    if (msg) msg.classList.add('hidden');
+    document.getElementById('changePasswordModal').classList.remove('hidden');
+}
+// 2. إغلاق النافذة
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.add('hidden');
+}
+// 3. إظهار/إخفاء رمز المرور بالعين
+function togglePassView(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerText = '🙈';
+    } else {
+        input.type = 'password';
+        icon.innerText = '👁️';
+    }
+}
+// 4. تنفيذ التغيير والربط مع سيرفر Supabase
+async function submitNewPassword(e) {
+    if (e) e.preventDefault();
+    const newPassword = document.getElementById('newPasswordInput').value.trim();
+    const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
+    const msg = document.getElementById('passChangeMsg');
+    const btn = document.getElementById('btnSavePassword');
+    // التحقق من المدخلات
+    if (!newPassword || newPassword.length < 6) {
+        msg.innerText = '⚠️ يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل.';
+        msg.className = 'text-xs font-bold p-2.5 rounded-xl text-center bg-rose-500/20 text-rose-500 block';
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        msg.innerText = '⚠️ كلمتا المرور غير متطابقتين، يرجى التأكد وإعادة الكتابة.';
+        msg.className = 'text-xs font-bold p-2.5 rounded-xl text-center bg-rose-500/20 text-rose-500 block';
+        return;
+    }
+    // تعطيل الزر أثناء الاتصال بالسيرفر
+    btn.disabled = true;
+    btn.innerText = 'جاري التحديث في السيرفر... ⏳';
+    try {
+        // استدعاء دالة تحديث الحساب الرسمية من Supabase
+        const { data, error } = await supabaseClient.auth.updateUser({
+            password: newPassword
+        });
+        if (error) throw error;
+        // في حال نجاح التحديث
+        msg.innerText = '✅ تم تحديث كلمة المرور بنجاح!';
+        msg.className = 'text-xs font-bold p-2.5 rounded-xl text-center bg-emerald-500/20 text-emerald-500 block';
+        setTimeout(() => {
+            closeChangePasswordModal();
+            btn.disabled = false;
+            btn.innerText = 'حفظ التغيير ✅';
+            alert('تم تغيير كلمة المرور بنجاح، يمكنك الآن استخدامها في تسجيلات الدخول القادمة.');
+        }, 1500);
+    } catch (err) {
+        console.error('Password Update Error:', err);
+        msg.innerText = '❌ فشل التحديث: ' + (err.message || 'حدث خطأ غير متوقع');
+        msg.className = 'text-xs font-bold p-2.5 rounded-xl text-center bg-rose-500/20 text-rose-500 block';
+        btn.disabled = false;
+        btn.innerText = 'حفظ التغيير ✅';
+    }
+}
 
-        function closeChangePasswordModal() {
-            document.getElementById('changePasswordModal').classList.add('hidden');
-        }
 
-        async function submitNewPassword() {
-            const newPass = document.getElementById('newPasswordInput').value;
-            if (!newPass || newPass.length < 6) {
-                alert('كلمة المرور يجب أن لا تقل عن 6 أحرف');
-                return;
-            }
-            try {
-                const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-                if (error) throw error;
-                alert('تم تغيير كلمة المرور بنجاح!');
-                closeChangePasswordModal();
-            } catch (err) {
-                alert('خطأ أثناء التغيير: ' + err.message);
-            }
+   function showTopAlert(message, ticketId = null) {
+    const banner = document.getElementById('topNotificationAlertBanner');
+    const textElem = document.getElementById('topNotificationAlertText');
+    if (!banner || !textElem) return;
+    textElem.innerText = message;
+    banner.classList.remove('hidden');
+    banner.classList.add('flex');
+    // عند النقر على الشريط يفتح الطلب مباشرة
+    banner.onclick = (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+            if (ticketId) openTicketDetailModal(ticketId);
+            dismissTopAlert();
         }
-
-    // دالة إضافة إشعار جديد (تُنشأ بحالة unread)
-function addNotification(message, type = 'status', ticketNum = '', ticketType = '', ticketId = null) {
+    };
+    // إخفاء تلقائي بعد 10 ثوانٍ إن لم يُغلق يدوياً
+    if (window.topAlertTimeout) clearTimeout(window.topAlertTimeout);
+    window.topAlertTimeout = setTimeout(() => {
+        dismissTopAlert();
+    }, 10000);
+}
+// 2. دالة إغلاق الشريط الأصفر
+function dismissTopAlert() {
+    const banner = document.getElementById('topNotificationAlertBanner');
+    if (banner) {
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+    }
+    if (window.topAlertTimeout) clearTimeout(window.topAlertTimeout);
+}
+// 3. دالة إضافة إشعار جديد + تشغيل النغمة والشريط الأصفر
+function addNotification(message, type = 'status', ticketNum = '', ticketType = '', ticketId = null, showAlertBanner = true) {
     const newNotif = {
         id: Date.now(),
         message: message,
@@ -1935,31 +2518,31 @@ function addNotification(message, type = 'status', ticketNum = '', ticketType = 
         ticketNum: ticketNum,
         ticketType: ticketType,
         ticketId: ticketId,
-        read: false, // تعيين كغير مقروء افتراضياً
+        read: false,
         timestamp: new Date().toISOString()
     };
-
-    // التأكد من وجود المصفوفة
     if (!window.notificationsList) {
         window.notificationsList = [];
     }
-
     notificationsList.unshift(newNotif);
-    
-    // حفظ وتحديث الواجهة (تأكد من وجود هذه الدوال لديك)
-    if (typeof saveNotificationsToStorage === 'function') saveNotificationsToStorage();
-    if (typeof updateNotificationsUI === 'function') updateNotificationsUI();
-    if (typeof playIphoneNotificationSound === 'function') playIphoneNotificationSound();
+    saveNotificationsToStorage();
+    updateNotificationsUI();
+    playIphoneNotificationSound();
+    // إظهار المستطيل الأصفر الوماض أعلى الصفحة
+    if (showAlertBanner) {
+        showTopAlert(message, ticketId);
+    }
 }
-
-// دالة تحديث واجهة الإشعارات
+// 4. تحديث قائمة الإشعارات والعدد في الهيدر (يظهر غير المقروء فقط)
 function updateNotificationsUI() {
     const container = document.getElementById('notificationsList');
     const badge = document.getElementById('headerBellBadge');
     
-    // فلترة الإشعارات غير المقروءة فقط للحساب والأيقونة
-    const unreadCount = notificationsList.filter(n => !n.read).length;
+    // تصفية الإشعارات غير المقروءة فقط
+    const unreadNotifications = notificationsList.filter(n => !n.read);
+    const unreadCount = unreadNotifications.length;
     
+    // تحديث رقم شارة الجرس
     if (badge) {
         if (unreadCount > 0) {
             badge.innerText = unreadCount;
@@ -1968,92 +2551,83 @@ function updateNotificationsUI() {
             badge.classList.add('hidden');
         }
     }
-
-    // إذا كانت القائمة فارغة أو تم قراءة/مسح كل الإشعارات
     if (!container) return;
     
-    if (notificationsList.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500" data-i18n="noNotifications">${translations[currentLang].noNotifications || 'لا توجد إشعارات حالياً'}</div>`;
+    // إذا كانت القائمة فارغة
+    if (unreadNotifications.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 font-bold" data-i18n="noNotifications">${translations[currentLang]?.noNotifications || 'لا توجد إشعارات جديدة حالياً'}</div>`;
         return;
     }
-
-    // عرض الإشعارات مع إضافة التظليل الأزرق للـ unread وزر الضغط عليها
-    container.innerHTML = notificationsList.map(n => `
+    // عرض الإشعارات غير المقروءة فقط
+    container.innerHTML = unreadNotifications.map(n => `
         <div onclick="markNotificationAsRead(${n.id}, '${n.ticketId || ''}')" 
-             class="notification-item ${!n.read ? 'unread' : ''} p-3 rounded-xl border border-slate-200 dark:border-slate-800 transition cursor-pointer hover:opacity-90 flex justify-between items-center gap-2">
+             title="اضغط لفتح الطلب ومسح الإشعار"
+             class="notification-item unread p-3 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/70 dark:bg-blue-950/40 transition cursor-pointer hover:opacity-90 flex justify-between items-center gap-2 shadow-sm">
             <div class="space-y-1 flex-1">
                 <div class="text-xs font-bold text-slate-800 dark:text-slate-200">${n.message}</div>
                 <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${new Date(n.timestamp).toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</div>
             </div>
-            ${!n.read ? '<span class="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" title="غير مقروء"></span>' : ''}
+            <span class="text-xs text-blue-600 dark:text-blue-400 font-bold shrink-0">عرض ◀</span>
         </div>
     `).join('');
 }
-
-// دالة تعليم الإشعار كمقروء عند الضغط عليه وإخفائه/تحديث القائمة
+// 5. عند النقر على الإشعار: يتم حذفه من القائمة وتصفير/تقليل العداد وفتح الطلب
 function markNotificationAsRead(notifId, ticketId) {
-    const notif = notificationsList.find(n => n.id === notifId);
-    if (notif) {
-        notif.read = true; // تحويل الحالة إلى مقروء
-        saveNotificationsToStorage();
-        updateNotificationsUI();
-    }
+    // إزالة الإشعار نهائياً من القائمة ليختفي فوراً
+    notificationsList = notificationsList.filter(n => n.id !== notifId);
+    saveNotificationsToStorage();
+    updateNotificationsUI();
     
-    // فتح تفاصيل الطلب مباشرة إن وجد
+    closeNotificationsModal();
+    dismissTopAlert();
+    // فتح تفاصيل الطلب مباشرة إن وجد معرّف الطلب
     if (ticketId && ticketId !== 'null' && ticketId !== 'undefined') {
-        closeNotificationsModal();
         openTicketDetailModal(ticketId);
     }
 }
-
-// دالة مسح كل الإشعارات
+// 6. دالة مسح الكل
 function clearNotifications() {
     notificationsList = [];
     saveNotificationsToStorage();
     updateNotificationsUI();
+    dismissTopAlert();
 }
-   function exportTableToExcel() {
-    const table = document.querySelector(".table-scroll-container table");
-    if (!table) return;
 
-    // استخراج عناوين الأوردة والأعمدة (Header Row)
-    const headers = [];
-    const headerCells = table.querySelectorAll("thead tr th");
-    headerCells.forEach(th => {
-        // نأخذ النص الرئيسي للعنوان فقط قبل القوائم المنسدلة
-        const textNode = th.querySelector("span") || th;
-        let headerText = textNode.innerText.trim();
-        headers.push(headerText);
-    });
+        function exportTableToExcel() {
+            const table = document.querySelector(".table-scroll-container table");
+            if (!table) return;
 
-    // استخراج بيانات الصفوف (Body Rows)
-    const rowsData = [];
-    const bodyRows = table.querySelectorAll("tbody tr");
-
-    bodyRows.forEach(row => {
-        const rowCells = row.querySelectorAll("td");
-        if (rowCells.length > 1) { // تخطي صف التلميح "جاري التحميل"
-            const rowData = [];
-            rowCells.forEach(td => {
-                // استخراج النص من داخل الخلايا واستبعاد الأزرار أو حقول الإدخال
-                let cellText = td.innerText.replace(/[\r\n]+/g, " ").trim();
-                rowData.push(cellText);
+            const headers = [];
+            const headerCells = table.querySelectorAll("thead tr th");
+            headerCells.forEach(th => {
+                const textNode = th.querySelector("span") || th;
+                let headerText = textNode.innerText.trim();
+                headers.push(headerText);
             });
-            rowsData.push(rowData);
+
+            const rowsData = [];
+            const bodyRows = table.querySelectorAll("tbody tr");
+
+            bodyRows.forEach(row => {
+                const rowCells = row.querySelectorAll("td");
+                if (rowCells.length > 1) {
+                    const rowData = [];
+                    rowCells.forEach(td => {
+                        let cellText = td.innerText.replace(/[\r\n]+/g, " ").trim();
+                        rowData.push(cellText);
+                    });
+                    rowsData.push(rowData);
+                }
+            });
+
+            const excelData = [headers, ...rowsData];
+            const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Tickets Data");
+
+            XLSX.writeFile(workbook, `Tickets_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
-    });
-
-    // دمج العناوين مع البيانات في مصفوفة واحدة
-    const excelData = [headers, ...rowsData];
-
-    // إنشاء كتاب العمل والورقة باستخدام SheetJS (XLSX)
-    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Tickets Data");
-
-    // تنزيل ملف أكسل
-    XLSX.writeFile(workbook, `Tickets_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
     </script>
 </body>
 </html>
+```
