@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>بوابة المشرف الموقعي - SANA</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -92,7 +93,6 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-right" dir="rtl">
 
-    <!-- الشريط الأصفر الوماض للتنبيهات الفورية -->
     <div id="topNotificationAlertBanner" class="hidden w-full max-w-xl bg-yellow-400 text-black font-black text-center py-3 px-4 shadow-xl z-50 sticky top-0 transition-all border-b-2 border-yellow-600 animate-blink-yellow rounded-2xl mb-3 flex justify-between items-center cursor-pointer">
         <div class="flex-1 flex justify-center items-center gap-2">
             <span class="text-xl">🔔</span>
@@ -101,12 +101,11 @@
         <button onclick="dismissTopAlert(event)" class="bg-black/20 hover:bg-black/30 text-black px-3 py-1 rounded-lg text-xs font-bold" data-i18n="closeBtn">إغلاق ✕</button>
     </div>
 
-    <!-- تراكب الشريط الجانبي -->
     <div id="sidebarOverlay" onclick="closeSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
     
-    <!-- القائمة الجانبية -->
+    <!-- القائمة الجانبية المحدثة مع دعم الإنتقال لشاشة خيارات الإشعارات بفاعلية -->
     <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white dark:bg-slate-900 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between text-right">
-        <div class="space-y-6">
+        <div id="sidebarMainView" class="space-y-6 overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-4">
                 <img src="Logo.png" alt="SANA Logo" class="h-8 object-contain">
                 <button onclick="closeSidebar()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xl font-bold">✕</button>
@@ -118,20 +117,52 @@
                 <button onclick="navigateTo('profile')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-300">
                     <span>👤</span> <span data-i18n="navProfile">حسابي</span>
                 </button>
-                <button onclick="openNotificationsPopup()" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-300">
+                <button onclick="switchSidebarView('settings')" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-800 transition text-black dark:text-slate-300">
                     <div class="flex items-center gap-3">
-                        <span>🔔</span> <span data-i18n="navNotifications">الإشعارات والتنبيهات</span>
+                        <span class="p-1 rounded-md bg-yellow-400 text-slate-900 text-xs shadow-sm">🔔</span>
+                        <span data-i18n="navNotificationSettings">إعدادات الإشعارات</span>
                     </div>
-                    <span id="sidebarNotifBadge" class="hidden bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+                    <span class="text-xs">◀</span>
                 </button>
             </nav>
         </div>
+
+        <div id="sidebarSettingsView" class="hidden space-y-6 overflow-y-auto flex-col">
+            <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-3">
+                <button onclick="switchSidebarView('main')" class="text-xs font-bold text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-1">
+                    <span>▶</span> <span data-i18n="backBtn">رجوع</span>
+                </button>
+                <h4 class="text-xs font-black text-slate-800 dark:text-slate-200" data-i18n="navNotificationSettings">إعدادات الإشعارات</h4>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center py-4 border-b border-slate-300 dark:border-slate-800 space-y-2">
+                <div class="w-20 h-20 rounded-full bg-[#3A6B68]/10 flex items-center justify-center p-3 border-2 border-[#3A6B68]/30 shadow-md">
+                    <img src="Logo.png" alt="SANA Logo" class="w-full h-auto object-contain">
+                </div>
+                <span class="text-xs font-black text-[#3A6B68] dark:text-[#4B8581]" data-i18n="customAlerts">تخصيص تنبيهات SANA</span>
+            </div>
+
+            <div class="space-y-3 bg-white dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-300 dark:border-slate-700 text-xs">
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="font-bold text-slate-800 dark:text-slate-200" data-i18n="notifNewTickets">1. الطلبات الجديدة</span>
+                    <input type="checkbox" id="notifTypeNewTickets" checked onchange="saveNotificationSettings()" class="w-4 h-4 accent-[#3A6B68]">
+                </label>
+                <label class="flex items-center justify-between cursor-pointer border-t border-slate-200 dark:border-slate-700/50 pt-2.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-200" data-i18n="notifStatusUpdates">2. تحديثات وتغيير الحالة</span>
+                    <input type="checkbox" id="notifTypeStatusUpdates" checked onchange="saveNotificationSettings()" class="w-4 h-4 accent-[#3A6B68]">
+                </label>
+                <label class="flex items-center justify-between cursor-pointer border-t border-slate-200 dark:border-slate-700/50 pt-2.5">
+                    <span class="font-bold text-slate-800 dark:text-slate-200" data-i18n="notifSlaAlerts">3. تنبيهات الـ SLA والنظام</span>
+                    <input type="checkbox" id="notifTypeSlaSystem" checked onchange="saveNotificationSettings()" class="w-4 h-4 accent-[#3A6B68]">
+                </label>
+            </div>
+        </div>
+
         <button onclick="openLogoutModal()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-bold text-sm rounded-xl border border-rose-500/20 transition">
             <span>🚪</span> <span data-i18n="btnLogout">تسجيل الخروج</span>
         </button>
     </aside>
 
-    <!-- الهيدر العلوي -->
     <header id="mainHeader" class="w-full max-w-xl flex justify-between items-center bg-white/80 dark:bg-slate-900/80 p-3.5 px-5 ios-card border border-slate-200/80 dark:border-slate-800 shadow-sm hidden mb-3">
         <div class="flex items-center gap-2">
             <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
@@ -166,7 +197,6 @@
         </div>
     </div>
 
-    <!-- نافذة الإشعارات المنبثقة -->
     <div id="notificationsPopup" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden text-right">
         <div class="ios-card bg-white dark:bg-[#0e1626] text-slate-900 dark:text-white p-5 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 space-y-4 max-h-[88vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -189,7 +219,6 @@
         </div>
     </div>
 
-    <!-- واجهة تسجيل الدخول -->
     <main id="loginSection" class="w-full max-w-lg my-auto flex flex-col items-center py-6 space-y-4">
         <div class="w-full flex justify-between items-center bg-white/80 dark:bg-slate-900/80 p-3 px-5 ios-card border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <button onclick="toggleTheme()" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold transition hover:opacity-80">
@@ -234,85 +263,102 @@
         </div>
     </main>
 
-    <!-- الصفحة الرئيسية -->
     <div id="homeView" class="hidden w-full max-w-xl space-y-5 pb-6 text-right">
         
-        <!-- فورمة إنشاء طلب جديد -->
-        <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-lg">
-            <h2 class="text-base font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-2" data-i18n="submitNewReq">
-                <span>👷</span> <span>تقديم طلب جديد</span>
-            </h2>
-            <div class="space-y-3">
-                <!-- 1. نوع الطلب -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1" data-i18n="reqType">1. نوع الطلب</label>
-                    <select id="ticketType" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer">
-                        <option value="طلب دخول موقع">طلب دخول موقع</option>
-                        <option value="طلب فريق QC">طلب فريق QC</option>
-                        <option value="طلب ملفات كابينة">طلب ملفات كابينة</option>
-                        <option value="طلب ملفات رنك">طلب ملفات رنك</option>
-                        <option value="طلب تحديثات">طلب تحديثات</option>
-                        <option value="طلب مواد">طلب مواد</option>
-                    </select>
-                </div>
+        <!-- فورمة إنشاء طلب جديد مع إظهار وإخفاء الحقول ديناميكياً حسب نوع الطلب -->
+     <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-lg">
+    <h2 class="text-base font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-2" data-i18n="submitNewReq">
+        <span>👷</span> <span>تقديم طلب جديد</span>
+    </h2>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1" data-i18n="reqType">1. نوع الطلب</label>
+            <select id="ticketType" onchange="adjustFormByTicketType(this.value)" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer">
+                        <option value="" disabled selected hidden>اختر الطلب...</option>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- 2. رقم الموقع / اسم الزون -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">2. رقم الموقع / اسم الزون</label>
-                        <input type="text" id="ticketZone" placeholder="مثال: FBG0012 أو اسم المنطقة" class="ios-input p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-xs focus:outline-none">
-                    </div>
+                <option value="طلب تصريح دخول موقع">طلب تصريح دخول موقع</option>
+                <option value="طلب فريق QC">طلب فريق QC</option>
+                <option value="طلب ملفات كابينة">طلب ملفات كابينة</option>
+                <option value="طلب ملفات رنك">طلب ملفات رنك</option>
+                <option value="طلب تحديثات">طلب تحديثات</option>
+                <option value="طلب مواد">طلب مواد</option>
+                <option value="طلب موقع خريطة">طلب موقع خريطة</option>
+                <option value="طلب سائق">طلب سائق</option>
+            </select>
+        </div>
 
-                    <!-- 3. رقم البروسس -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">3. رقم البروسس (Process)</label>
-                        <select id="ticketProcess" class="ios-input p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer">
-                            <option value="24">24</option>
-                            <option value="67">67</option>
-                            <option value="non">non</option>
-                        </select>
-                    </div>
-                </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label id="lblZone" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">2. اسم الموقع / الزون</label>
+                <input type="text" id="ticketZone" placeholder="مثال: FBG0012 أو اسم المنطقة" class="ios-input p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-xs focus:outline-none">
+            </div>
 
-                <!-- 4. المحافظة -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">4. المحافظة</label>
-                    <select id="ticketGovernorate" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer">
-                        <option value="بغداد">بغداد</option>
-                        <option value="البصرة">البصرة</option>
-                        <option value="نينوى">نينوى</option>
-                        <option value="أربيل">أربيل</option>
-                        <option value="كركوك">كركوك</option>
-                        <option value="النجف">النجف</option>
-                        <option value="كربلاء">كربلاء</option>
-                        <option value="السليمانية">السليمانية</option>
-                        <option value="دهوك">دهوك</option>
-                        <option value="الأنبار">الأنبار</option>
-                        <option value="ذي قار">ذي قار</option>
-                        <option value="بابل">بابل</option>
-                        <option value="ديالى">ديالى</option>
-                        <option value="ميسان">ميسان</option>
-                        <option value="المثنى">المثنى</option>
-                        <option value="القادسية">القادسية</option>
-                        <option value="واسط">واسط</option>
-                        <option value="صلاح الدين">صلاح الدين</option>
-                    </select>
-                </div>
+            <!-- الحقل الديناميكي المحدث (رقم البروسس / وقت الشفت / وقت وتاريخ الدخول) -->
+            <div>
+                <label id="lblProcess" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">3. وقت وتاريخ الدخول</label>
+                
+                <select id="ticketProcess" class="ios-input p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer hidden">
+                            <option value="" disabled selected hidden>اختر البروسس...</option>
 
-                <!-- 5. ملاحظة عامة -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">5. ملاحظة عامة (Field Note)</label>
-                    <textarea id="ticketNotes" rows="2" placeholder="اكتب أي تفاصيل أو ملاحظات إضافية هنا..." class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs focus:outline-none"></textarea>
-                </div>
+                    <option value="24">24</option>
+                    <option value="67">67</option>
+                    <option value="non">non</option>
+                </select>
 
-                <button onclick="sendTicket()" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white font-extrabold py-3.5 text-xs shadow-md flex items-center justify-center gap-2 transition" data-i18n="btnSubmit">
-                    <span>إرسال الطلب إلى الأوفيس</span> <span>🚀</span>
-                </button>
-                <p id="ticketStatus" class="text-center text-xs font-bold p-2.5 rounded-xl hidden transition-all duration-300"></p>
+                <select id="ticketDriverShift" class="ios-input p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer hidden">
+                            <option value="" disabled selected hidden>اختر الشفت ...</option>
+                    <option value="صباحي">صباحي</option>
+                    <option value="مسائي">مسائي</option>
+                    <option value="صباحي مسائي">صباحي مسائي</option>
+                    <option value="مسائي فجري">مسائي فجري</option>
+                    <option value="فجري صباحي">فجري صباحي</option>
+                </select>
+
+                <input 
+                    type="datetime-local" 
+                    id="ticketSiteTime" 
+                    onclick="this.showPicker && this.showPicker()"
+                    class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-semibold text-xs focus:outline-none cursor-pointer">
             </div>
         </div>
 
-        <!-- قائمة الطلبات وتوزيع الحالات الثلاث -->
+        <div id="govContainer">
+    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">4. المحافظة</label>
+    <select id="ticketGovernorate" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-xs focus:outline-none cursor-pointer" required>
+        <option value="" disabled selected hidden>اختر المحافظة...</option>
+        <option value="بغداد">بغداد</option>
+        <option value="البصرة">البصرة</option>
+        <option value="نينوى">نينوى</option>
+        <option value="أربيل">أربيل</option>
+        <option value="كركوك">كركوك</option>
+        <option value="النجف">النجف</option>
+        <option value="كربلاء">كربلاء</option>
+        <option value="السليمانية">السليمانية</option>
+        <option value="دهوك">دهوك</option>
+        <option value="الأنبار">الأنبار</option>
+        <option value="ذي قار">ذي قار</option>
+        <option value="بابل">بابل</option>
+        <option value="ديالى">ديالى</option>
+        <option value="ميسان">ميسان</option>
+        <option value="المثنى">المثنى</option>
+        <option value="القادسية">القادسية</option>
+        <option value="واسط">واسط</option>
+        <option value="صلاح الدين">صلاح الدين</option>
+    </select>
+</div>
+
+        <div id="notesContainer">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">5. ملاحظة عامة (Field Note)</label>
+            <textarea id="ticketNotes" rows="2" placeholder="اكتب أي تفاصيل أو ملاحظات إضافية هنا..." class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs focus:outline-none"></textarea>
+        </div>
+
+        <button onclick="sendTicket()" class="ios-button w-full bg-[#3A6B68] hover:bg-[#2E5553] text-white font-extrabold py-3.5 text-xs shadow-md flex items-center justify-center gap-2 transition" data-i18n="btnSubmit">
+            <span>إرسال الطلب إلى الأوفيس</span> <span>🚀</span>
+        </button>
+        <p id="ticketStatus" class="text-center text-xs font-bold p-2.5 rounded-xl hidden transition-all duration-300"></p>
+    </div>
+</div>
+
         <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-lg">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <h3 class="text-base font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-2" data-i18n="boardTitle">
@@ -330,7 +376,6 @@
                 </div>
             </div>
 
-            <!-- زر فتح البحث -->
             <div>
                 <button type="button" onclick="toggleFilterControls()" class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#3A6B68]/10 hover:text-[#3A6B68] dark:hover:text-[#4B8581] border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-extrabold transition">
                     <span class="flex items-center gap-2">
@@ -341,17 +386,22 @@
                 </button>
             </div>
 
-            <!-- خيارات البحث والفلترة -->
             <div id="filterControlsContainer" class="hidden space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 transition-all duration-300">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right">🔍 البحث بالموقع أو الزون</label>
-                        <input type="text" id="searchNameInput" oninput="applyFilters()" placeholder="مثال: FBG0012" class="ios-input w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right">🏷️ البحث بنوع الطلب</label>
-                        <input type="text" id="searchTypeInput" oninput="applyFilters()" placeholder="مثال: طلب فريق QC" class="ios-input w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none">
-                    </div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1 text-right">🏷️ البحث بنوع الطلب</label>
+    <select id="searchTypeInput" onchange="applyFilters()" class="ios-input w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none cursor-pointer">
+        <option value="">جميع أنواع الطلبات</option>
+        <option value="طلب تصريح دخول موقع">طلب تصريح دخول موقع</option>
+        <option value="طلب فريق QC">طلب فريق QC</option>
+        <option value="طلب ملفات كابينة">طلب ملفات كابينة</option>
+        <option value="طلب ملفات رنك">طلب ملفات رنك</option>
+        <option value="طلب تحديثات">طلب تحديثات</option>
+        <option value="طلب مواد">طلب مواد</option>
+        <option value="طلب موقع خريطة">طلب موقع خريطة</option>
+        <option value="طلب سائق">طلب سائق</option>
+    </select>
+</div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -378,12 +428,11 @@
                 </div>
             </div>
 
-            <!-- حاوية عرض كروت الطلبات -->
             <div id="ticketsContainer" class="space-y-3 pt-2"></div>
         </div>
     </div>
 
-    <!-- نافذة تفاصيل الطلب الكاملة للفيلد -->
+    <!-- نافذة تفاصيل الطلب الكاملة للفيلد مع العرض المحدث ديناميكياً للطلب والتعديل -->
     <div id="ticketDetailModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden text-right">
         <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -396,7 +445,6 @@
 
             <input type="hidden" id="modalCurrentTicketId">
 
-            <!-- ملخص الحقول الأساسية للطلب -->
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
                     <span class="text-slate-400 block text-[10px] font-bold">نوع الطلب</span>
@@ -407,7 +455,7 @@
                     <span id="modalTicketStatusBadge" class="px-2 py-0.5 rounded-lg text-[11px] font-black inline-block mt-0.5">-</span>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <span class="text-slate-400 block text-[10px] font-bold">رقم البروسس</span>
+                    <span id="modalTicketProcessLabel" class="text-slate-400 block text-[10px] font-bold">رقم البروسس</span>
                     <span id="modalTicketProcess" class="font-mono font-bold text-slate-800 dark:text-slate-100">-</span>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -416,10 +464,9 @@
                 </div>
             </div>
 
-            <!-- بطاقة موظف الأوفيس المسؤول والمدة المنقضية -->
             <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/60 items-center">
                 <div>
-                    <span class="block text-[11px] font-bold text-slate-400">👤 موظف الأوفيس المسؤول:</span>
+                    <span class="block text-[11px] font-bold text-slate-400">👤 الموظف المستقبل/المسؤول:</span>
                     <button id="modalOfficeUserBtn" onclick="openOfficeUserContactModal()" class="text-xs font-black text-[#3A6B68] dark:text-[#4B8581] hover:underline flex items-center gap-1 mt-0.5">
                         <span id="modalOfficeUser">غير محجوز بعد</span>
                         <span class="text-[10px]">📇</span>
@@ -433,19 +480,17 @@
                 </div>
             </div>
 
-            <!-- ملاحظة الفيلد -->
             <div>
                 <span class="block text-xs font-bold text-slate-500 mb-1">ملاحظة الفيلد المرسلة:</span>
                 <div id="modalFieldNotes" class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium"></div>
             </div>
 
-            <!-- ملاحظات ومخرجات الأوفيس -->
             <div>
                 <span class="block text-xs font-bold text-[#3A6B68] dark:text-[#4B8581] mb-1">📝 ملاحظات وإجراءات تيم الأوفيس:</span>
                 <div id="modalOfficeNotes" class="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 leading-relaxed"></div>
             </div>
 
-            <!-- قسم تعديل وإعادة إرسال الطلب (يظهر فقط إذا كانت الحالة تحتاج تعديل) -->
+            <!-- قسم تعديل وإعادة إرسال الطلب المحدث بمراعاة حقل نوع الطلب -->
             <div id="resubmitSection" class="hidden p-4 bg-yellow-500/10 border-2 border-yellow-400 rounded-2xl space-y-3">
                 <div class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 font-extrabold text-xs">
                     <span>⚠️</span>
@@ -454,28 +499,43 @@
                 <div class="space-y-2">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">نوع الطلب</label>
-                        <select id="editTicketType" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
-                            <option value="طلب دخول موقع">طلب دخول موقع</option>
+                        <select id="editTicketType" onchange="adjustEditFormByTicketType(this.value)" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
+                            <option value="طلب تصريح دخول موقع">طلب تصريح دخول موقع</option>
                             <option value="طلب فريق QC">طلب فريق QC</option>
                             <option value="طلب ملفات كابينة">طلب ملفات كابينة</option>
                             <option value="طلب ملفات رنك">طلب ملفات رنك</option>
                             <option value="طلب تحديثات">طلب تحديثات</option>
                             <option value="طلب مواد">طلب مواد</option>
+                            <option value="طلب موقع خريطة">طلب موقع خريطة</option>
+                            <option value="طلب سائق">طلب سائق</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">رقم الموقع / اسم الزون</label>
                         <input type="text" id="editTicketZone" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
                     </div>
+                    
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">رقم البروسس</label>
+                            <label id="editProcessLabel" class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">رقم البروسس</label>
+                            
                             <select id="editTicketProcess" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
                                 <option value="24">24</option>
                                 <option value="67">67</option>
                                 <option value="non">non</option>
                             </select>
+
+                            <select id="editTicketDriverShift" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none hidden">
+                                <option value="صباحي">صباحي</option>
+                                <option value="مسائي">مسائي</option>
+                                <option value="صباحي مسائي">صباحي مسائي</option>
+                                <option value="مسائي فجري">مسائي فجري</option>
+                                <option value="فجري صباحي">فجري صباحي</option>
+                            </select>
+
+                            <input type="datetime-local" id="editTicketSiteTime" onclick="this.showPicker && this.showPicker()" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none hidden">
                         </div>
+
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">المحافظة</label>
                             <select id="editTicketGov" class="ios-input w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold focus:outline-none">
@@ -510,38 +570,16 @@
                 </button>
             </div>
 
-            <!-- قسم إرفاق وعرض ملفات الطلب (مظلل بمستطيل أخضر فاتح) -->
-            <div class="bg-[#3A6B68]/10 dark:bg-[#3A6B68]/15 border-2 border-[#3A6B68]/40 dark:border-[#4B8581]/50 p-4 rounded-2xl space-y-3 shadow-inner">
+               <div class="bg-[#3A6B68]/10 dark:bg-[#3A6B68]/15 border-2 border-[#3A6B68]/40 dark:border-[#4B8581]/50 p-4 rounded-2xl space-y-3 shadow-inner">
                 <div class="flex items-center justify-between border-b border-[#3A6B68]/20 dark:border-[#3A6B68]/30 pb-2">
                     <label class="block text-xs font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-1.5">
-                        <span>📎</span> <span>منطقة المرفقات وسجل الملفات</span>
+                        <span>📎</span> <span data-i18n="attachmentsArea">منطقة الملفات وسجل المرفقات</span>
                     </label>
-                    <span class="text-[10px] font-bold text-[#3A6B68] dark:text-[#4B8581] bg-white/70 dark:bg-slate-800/70 px-2 py-0.5 rounded-lg border border-[#3A6B68]/30">سحابة التخزين</span>
+                    <span class="text-[10px] font-bold text-[#3A6B68] dark:text-[#4B8581]" data-i18n="clickToDownload">اضغط على أي ملف للتحميل</span>
                 </div>
-                
-                <!-- منطقة السحب والإفلات والرفع -->
-                 <div class="bg-[#3A6B68]/10 dark:bg-[#3A6B68]/15 border-2 border-[#3A6B68]/40 dark:border-[#4B8581]/50 p-4 rounded-2xl space-y-2.5 shadow-inner">
-                <div class="flex items-center justify-between border-b border-[#3A6B68]/20 dark:border-[#3A6B68]/30 pb-2">
-                    <label class="block text-xs font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center gap-1.5">
-                        <span>📎</span> <span>ملفات ومرفقات الطلب (تحميل فقط)</span>
-                    </label>
-                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">اضغط على أي ملف للتحميل</span>
-                </div>
-                <!-- قائمة عرض وتحميل الملفات فقط -->
-                <div id="uploadedFilesList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    <!-- يتم التحميل التلقائي عبر loadTicketFiles -->
-                </div>
+                <div id="uploadedFilesList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
             </div>
 
-
-                <!-- قائمة سجل الملفات المرفوعة -->
-                <div>
-                    <span class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">الملفات المرفوعة:</span>
-                    <div id="uploadedFilesList" class="space-y-2 max-h-44 overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-
-            <!-- سجل التغييرات والأحداث السابقة (History Timeline) -->
             <div class="space-y-2 border-t border-slate-200 dark:border-slate-800 pt-3">
                 <h4 class="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                     <span>⏳</span> <span>سجل التغييرات والأحداث السابقة:</span>
@@ -555,7 +593,6 @@
         </div>
     </div>
 
-    <!-- النافذة المنبثقة لمعلومات وتفاصيل موظف الأوفيس -->
     <div id="officeUserModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[60] flex items-center justify-center p-4 hidden">
         <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-sm w-full border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl">
             <div class="w-16 h-16 rounded-full bg-[#3A6B68]/20 text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center mx-auto text-2xl font-bold border border-[#3A6B68]/30">👤</div>
@@ -593,7 +630,7 @@
         </div>
     </div>
 
-    <!-- شاشة حسابي الشخصي -->
+    <!-- شاشة حسابي الشخصي للفيلد المحدثة لضبط الداتا المرسلة والمنجزة بدقة -->
     <div id="profileView" class="hidden w-full max-w-xl space-y-4 pb-6 text-right">
         <div class="ios-card bg-white/90 dark:bg-slate-900/90 p-6 border border-slate-200 dark:border-slate-800 space-y-4">
             <h2 class="text-base font-black text-[#3A6B68] dark:text-[#4B8581] border-b border-slate-200 dark:border-slate-800 pb-3" data-i18n="profileHeader">👤 معلومات الحساب الشخصي</h2>
@@ -623,11 +660,11 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">الطلبات المقبولة/النشطة</label>
-                    <div id="profileActiveCount" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-emerald-500">0 طلب</div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">الطلبات المنجزة</label>
+                    <div id="profileActiveCount" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-emerald-500">0 مكتملة</div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">إجمالي طلباتي</label>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-1">الطلبات المرسلة من هذا الحساب</label>
                     <div id="profileTotalCount" class="ios-input p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200">0 طلب</div>
                 </div>
             </div>
@@ -649,7 +686,6 @@
         </div>
     </div>
 
-    <!-- مودال تسجيل الخروج -->
     <div id="logoutModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
         <div class="ios-card bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-xs w-full border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl">
             <div class="w-10 h-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto text-lg">⚠️</div>
@@ -662,7 +698,6 @@
         </div>
     </div>
 
-    <!-- مودال تغيير كلمة المرور -->
    <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden text-right">
         <div class="ios-card bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -672,7 +707,6 @@
                 <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg font-bold">✕</button>
             </div>
             <form onsubmit="handlePreChangePassword(event)" class="space-y-3">
-                <!-- 1. كلمة المرور القديمة / الحالية -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">كلمة المرور الحالية (القديمة)</label>
                     <div class="relative">
@@ -682,7 +716,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- 2. كلمة المرور الجديدة -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">كلمة المرور الجديدة</label>
                     <div class="relative">
@@ -692,8 +725,8 @@
                         </button>
                     </div>
                 </div>
-                <!-- 3. تأكيد كلمة المرور الجديدة -->
                 <div>
+                   
                     <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">تأكيد كلمة المرور الجديدة</label>
                     <div class="relative">
                         <input type="password" id="confirmPasswordInput" required minlength="6" placeholder="أعد كتابة كلمة المرور للتأكيد" class="ios-input w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none pl-10">
@@ -702,7 +735,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- رسالة التنبيهات والأخطاء -->
                 <p id="passChangeMsg" class="hidden text-xs font-bold p-2.5 rounded-xl text-center"></p>
                 <div class="flex gap-2.5 pt-2">
                     <button type="submit" id="btnOpenConfirmPass" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-black py-3.5 shadow-md transition">
@@ -715,7 +747,7 @@
             </form>
         </div>
     </div>
-    <!-- 2. نافذة تأكيد التغيير وإنهاء الجلسة (مطابقة لشكل نافذة تسجيل الخروج) -->
+
     <div id="confirmChangePassModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden text-right">
         <div class="ios-card bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl max-w-sm w-full border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-2xl">
             <div class="w-12 h-12 rounded-full bg-[#3A6B68]/15 text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center mx-auto text-2xl font-bold border border-[#3A6B68]/30">
@@ -737,38 +769,30 @@
         </div>
     </div>
 
-
-
     <script>
-        const SUPABASE_URL = 'https://xliwjzykrtlbujqkmqke.supabase.co/';
-        const SUPABASE_ANON_KEY = 'sb_publishable_ZKkCIsG9ln0xiYLbR8EQlA_wUhdEP_L';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let sharedAudioContext = null;
-
-        document.addEventListener('click', function initAudioEngine() {
-            if (!sharedAudioContext) {
-                sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (sharedAudioContext.state === 'suspended') {
-                sharedAudioContext.resume();
-            }
-        }, { once: true });
+       const SUPABASE_URL = 'https://xliwjzykrtlbujqkmqke.supabase.co/';
+const SUPABASE_ANON_KEY = 'sb_publishable_ZKkCIsG9ln0xiYLbR8EQlA_wUhdEP_L';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        storageKey: 'sana_field_auth_token',
+        persistSession: true
+    }
+});
 
         const translations = {
             ar: {
-                navHome: "الصفحة الرئيسية", navProfile: "حسابي", navNotifications: "الإشعارات", btnLogout: "تسجيل الخروج",
+                navHome: "الصفحة الرئيسية", navProfile: "حسابي", navNotificationSettings: "إعدادات الإشعارات", btnLogout: "تسجيل الخروج",
                 portalTitle: "بوابة المشرف الموقعي", portalSubtitle: "يرجى تسجيل الدخول للوصول إلى لوحة المتابعة",
                 lblEmail: "البريد الإلكتروني", lblPassword: "كلمة المرور", loginBtn: "تسجيل الدخول", rememberMe: "تذكر بياناتي",
                 submitNewReq: "👷 تقديم طلب جديد", reqType: "1. نوع الطلب", btnSubmit: "إرسال الطلب إلى الأوفيس 🚀",
                 boardTitle: "📋 قائمة الطلبات", searchBy: "البحث والفلترة السريعة", btnCloseModal: "إغلاق",
                 btnCall: "اتصال مباشر", btnWhatsapp: "واتساب", fullName: "الاسم الكامل", jobTitle: "العنوان الوظيفي",
-                lblDirectManager: "المدير المباشر", governorate: "المحافظة", lblPhone: "رقم الهاتف",
+                lblDirectManager: "المدير المباشر", governorate: "المافظة", lblPhone: "رقم الهاتف",
                 confirmLogoutTitle: "تأكيد تسجيل الخروج", confirmLogoutDesc: "هل أنت متأكد من أنك تريد الخروج من الحساب الآن؟",
                 yesLogout: "نعم، خروج", cancel: "إلغاء", popupNotifTitle: "الإشعارات والتنبيهات", profileHeader: "👤 معلومات الحساب الشخصي"
             },
             en: {
-                navHome: "Home Page", navProfile: "My Profile", navNotifications: "Notifications", btnLogout: "Logout",
+                navHome: "Home Page", navProfile: "My Profile", navNotificationSettings: "Notification Settings", btnLogout: "Logout",
                 portalTitle: "Site Supervisor Portal", portalSubtitle: "Please sign in to access supervisor dashboard",
                 lblEmail: "Email Address", lblPassword: "Password", loginBtn: "Sign In", rememberMe: "Remember Me",
                 submitNewReq: "👷 Submit New Ticket", reqType: "1. Ticket Type", btnSubmit: "Send Ticket to Office 🚀",
@@ -786,37 +810,78 @@
         let selectedTimeFilter = 'all';
         let currentUserProfile = { id: '', name: '', role: 'Site Supervisor', email: '', manager: '-', phone: '-', governorate: '-', gender: 'Male' };
         let activeOfficeUser = null;
+        let notificationSettings = { newTickets: true, statusUpdates: true, slaSystem: true };
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            loadStoredNotifications();
-            try {
-                const { data: { session }, error } = await supabaseClient.auth.getSession();
-                if (error) throw error;
-                if (session && session.user) {
-                    const user = session.user;
-                    currentUserProfile.id = user.id;
-                    const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
-                    if (profileData) {
-                        currentUserProfile.name = profileData.full_name || user.email.split('@')[0];
-                        currentUserProfile.email = user.email;
-                        currentUserProfile.role = profileData.job_title || 'Site Supervisor';
-                        currentUserProfile.governorate = profileData.governorate || '-';
-                        currentUserProfile.phone = profileData.phone || '-';
-                        currentUserProfile.manager = profileData.direct_manager || '-';
-                        currentUserProfile.gender = profileData.gender || 'Male';
-                    } else {
-                        currentUserProfile.name = user.email.split('@')[0];
-                        currentUserProfile.email = user.email;
-                    }
+       window.addEventListener('DOMContentLoaded', async () => {
+    loadStoredNotifications();
+    loadNotificationSettings();
+    try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && session.user) {
+            const user = session.user;
+            
+            // التحقق من الصلاحية
+            const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+            const userRole = profileData?.role || '';
+            if (userRole !== 'field' && userRole !== 'hybrid') {
+                await supabaseClient.auth.signOut();
+                return;
+            }
+            currentUserProfile.id = user.id;
+            if (profileData) {
+                currentUserProfile.name = profileData.full_name || user.email.split('@')[0];
+                currentUserProfile.email = user.email;
+                currentUserProfile.role = profileData.job_title || 'Site Supervisor';
+                currentUserProfile.governorate = profileData.governorate || '-';
+                currentUserProfile.phone = profileData.phone || '-';
+                currentUserProfile.manager = profileData.direct_manager || '-';
+                currentUserProfile.gender = profileData.gender || 'Male';
+            }
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainLogoBanner').classList.remove('hidden');
+            navigateTo('home');
+            setupRealtimeTickets();
+        }
+    } catch (err) { console.error('Session restore error:', err.message); }
+});
 
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('mainHeader').classList.remove('hidden');
-                    document.getElementById('mainLogoBanner').classList.remove('hidden');
-                    navigateTo('home');
-                    setupRealtimeTickets();
-                }
-            } catch (err) { console.error('Session restore error:', err.message); }
-        });
+        // دالة التنقل والتنقل السلس داخل النافذة الجانبية للإشعارات
+        function switchSidebarView(view) {
+            const mainView = document.getElementById('sidebarMainView');
+            const settingsView = document.getElementById('sidebarSettingsView');
+            if (!mainView || !settingsView) return;
+            if (view === 'settings') {
+                mainView.classList.add('hidden');
+                settingsView.classList.remove('hidden');
+                settingsView.classList.add('flex');
+            } else {
+                settingsView.classList.add('hidden');
+                settingsView.classList.remove('flex');
+                mainView.classList.remove('hidden');
+            }
+        }
+
+        function loadNotificationSettings() {
+            const saved = localStorage.getItem('sana_field_notif_settings');
+            if (saved) {
+                try {
+                    notificationSettings = JSON.parse(saved);
+                    if (document.getElementById('notifTypeNewTickets')) document.getElementById('notifTypeNewTickets').checked = notificationSettings.newTickets;
+                    if (document.getElementById('notifTypeStatusUpdates')) document.getElementById('notifTypeStatusUpdates').checked = notificationSettings.statusUpdates;
+                    if (document.getElementById('notifTypeSlaSystem')) document.getElementById('notifTypeSlaSystem').checked = notificationSettings.slaSystem;
+                } catch(e) {}
+            }
+        }
+
+        function saveNotificationSettings() {
+            notificationSettings = {
+                newTickets: document.getElementById('notifTypeNewTickets')?.checked ?? true,
+                statusUpdates: document.getElementById('notifTypeStatusUpdates')?.checked ?? true,
+                slaSystem: document.getElementById('notifTypeSlaSystem')?.checked ?? true
+            };
+            localStorage.setItem('sana_field_notif_settings', JSON.stringify(notificationSettings));
+        }
 
         function playIphoneNotificationSound() {
             try {
@@ -906,69 +971,155 @@
             });
         }
 
-        // إرسال طلب جديد إلى السيرفر
-        async function sendTicket() {
-            const type = document.getElementById('ticketType').value;
-            const zone = document.getElementById('ticketZone').value.trim();
-            const process = document.getElementById('ticketProcess').value;
-            const governorate = document.getElementById('ticketGovernorate').value;
-            const notes = document.getElementById('ticketNotes').value.trim();
-            const statusEl = document.getElementById('ticketStatus');
+        // تعديل كود إنشاء الطلب ومطابقة الحقول ديناميكياً
+        function adjustFormByTicketType(type) {
+            const lblZone = document.getElementById('lblZone');
+            const lblProcess = document.getElementById('lblProcess');
+            const procSelect = document.getElementById('ticketProcess');
+            const shiftSelect = document.getElementById('ticketDriverShift');
+            const timeInput = document.getElementById('ticketSiteTime');
+            const govContainer = document.getElementById('govContainer');
+            const notesContainer = document.getElementById('notesContainer');
 
-            if (!zone) {
-                statusEl.innerText = '⚠️ يرجى كتابة رقم الموقع أو اسم الزون';
-                statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
-                return;
-            }
+            procSelect.classList.add('hidden');
+            shiftSelect.classList.add('hidden');
+            timeInput.classList.add('hidden');
+            govContainer.classList.remove('hidden');
+            notesContainer.classList.remove('hidden');
 
-            let slaMinutes = 60;
-            if (type.includes('QC')) slaMinutes = 120;
-            else if (type.includes('دخول موقع')) slaMinutes = 30;
-            else if (type.includes('تحديثات')) slaMinutes = 45;
-            else if (type.includes('مواد')) slaMinutes = 90;
-
-            const now = new Date();
-            const dueAt = new Date(now.getTime() + slaMinutes * 60000);
-
-            const initialHistory = [{
-                timestamp: now.toISOString(),
-                author: currentUserProfile.name,
-                author_id: currentUserProfile.id,
-                action: 'إنشاء الطلب وإرساله إلى الباك أوفيس',
-                notes: notes || ''
-            }];
-
-            const payload = {
-                ticket_type: type,
-                zone_address: zone,
-                zone_number: zone,
-                process_number: process,
-                governorate: governorate,
-                field_notes: notes,
-                notes: notes,
-                status: 'جديد',
-                sender_id: currentUserProfile.id,
-                sender_name: currentUserProfile.name,
-                user_id: currentUserProfile.id,
-                user_name: currentUserProfile.name,
-                created_at: now.toISOString(),
-                due_at: dueAt.toISOString(),
-                history_logs: initialHistory
-            };
-
-            const { data, error } = await supabaseClient.from('tickets').insert([payload]).select();
-            if (!error) {
-                statusEl.innerText = '✅ تم إرسال الطلب بنجاح إلى الباك أوفيس!';
-                statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-emerald-500/20 text-emerald-500 block';
-                document.getElementById('ticketZone').value = '';
-                document.getElementById('ticketNotes').value = '';
-                fetchTickets();
-                setTimeout(() => statusEl.classList.add('hidden'), 4000);
+            if (type === 'طلب تصريح دخول موقع') {
+                if (lblZone) lblZone.innerText = currentLang === 'ar' ? '2. اسم الموقع / الزون' : '2. Site / Zone Name';
+                if (lblProcess) lblProcess.innerText = currentLang === 'ar' ? '3. وقت وتاريخ الدخول' : '3. Entry Time';
+                timeInput.classList.remove('hidden');
+            } else if (type === 'طلب سائق') {
+                if (lblZone) lblZone.innerText = currentLang === 'ar' ? '2. اسم الموقع' : '2. Site Name';
+                if (lblProcess) lblProcess.innerText = currentLang === 'ar' ? '3. وقت الشفت' : '3. Shift Time';
+                shiftSelect.classList.remove('hidden');
             } else {
-                statusEl.innerText = '❌ فشل الإرسال: ' + error.message;
-                statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+                if (lblZone) lblZone.innerText = currentLang === 'ar' ? '2. رقم الموقع / اسم الزون' : '2. Site No. / Zone Name';
+                if (lblProcess) lblProcess.innerText = currentLang === 'ar' ? '3. رقم البروسس (Process)' : '3. Process Number';
+                procSelect.classList.remove('hidden');
             }
         }
+
+        function adjustEditFormByTicketType(type) {
+            const lblProc = document.getElementById('editProcessLabel');
+            const procSelect = document.getElementById('editTicketProcess');
+            const shiftSelect = document.getElementById('editTicketDriverShift');
+            const timeInput = document.getElementById('editTicketSiteTime');
+
+            procSelect.classList.add('hidden');
+            shiftSelect.classList.add('hidden');
+            timeInput.classList.add('hidden');
+
+            if (type === 'طلب تصريح دخول موقع') {
+                if (lblProc) lblProc.innerText = 'وقت وتاريخ الدخول';
+                timeInput.classList.remove('hidden');
+            } else if (type === 'طلب سائق') {
+                if (lblProc) lblProc.innerText = 'وقت الشفت';
+                shiftSelect.classList.remove('hidden');
+            } else {
+                if (lblProc) lblProc.innerText = 'رقم البروسس';
+                procSelect.classList.remove('hidden');
+            }
+        }
+
+        async function sendTicket() {
+    const type = document.getElementById('ticketType').value;
+    const zone = document.getElementById('ticketZone').value.trim();
+    const governorate = document.getElementById('ticketGovernorate').value;
+    const notes = document.getElementById('ticketNotes').value.trim();
+    const statusEl = document.getElementById('ticketStatus');
+    let processVal = '-';
+    let driverShiftVal = null;
+    let siteTimeVal = null;
+    // --- التحقق من إجبارية الحقول الأساسية ---
+    if (!type) {
+        statusEl.innerText = '⚠️ يرجى اختيار نوع الطلب أولاً';
+        statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+        return;
+    }
+    if (!zone) {
+        statusEl.innerText = '⚠️ يرجى كتابة اسم/رقم الموقع أو الزون';
+        statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+        return;
+    }
+    // التحقق الإجباري حسب نوع الطلب
+    if (type === 'طلب تصريح دخول موقع') {
+        siteTimeVal = document.getElementById('ticketSiteTime').value;
+        if (!siteTimeVal) {
+            statusEl.innerText = '⚠️ يرجى تحديد وقت وتاريخ الدخول';
+            statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+            return;
+        }
+    } else if (type === 'طلب سائق') {
+        driverShiftVal = document.getElementById('ticketDriverShift').value;
+        if (!driverShiftVal) {
+            statusEl.innerText = '⚠️ يرجى اختيار وقت الشفت للسائق';
+            statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+            return;
+        }
+    } else {
+        processVal = document.getElementById('ticketProcess').value;
+        if (!processVal) {
+            statusEl.innerText = '⚠️ يرجى اختيار رقم البروسس';
+            statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+            return;
+        }
+    }
+    if (!governorate) {
+        statusEl.innerText = '⚠️ يرجى اختيار المحافظة';
+        statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+        return;
+    }
+    // حساب SLA
+    let slaMinutes = 60;
+    if (type.includes('QC')) slaMinutes = 120;
+    else if (type.includes('دخول موقع')) slaMinutes = 30;
+    else if (type.includes('تحديثات')) slaMinutes = 45;
+    else if (type.includes('مواد')) slaMinutes = 90;
+    const now = new Date();
+    const dueAt = new Date(now.getTime() + slaMinutes * 60000);
+    const initialHistory = [{
+        timestamp: now.toISOString(),
+        author: currentUserProfile.name,
+        author_id: currentUserProfile.id,
+        action: 'إنشاء الطلب وإرساله إلى الباك أوفيس',
+        notes: notes || ''
+    }];
+    const payload = {
+        ticket_type: type,
+        zone_address: zone,
+        zone_number: zone,
+        process_number: processVal,
+        DriverShift: driverShiftVal,
+        SiteTime: siteTimeVal,
+        governorate: governorate,
+        field_notes: notes,
+        notes: notes,
+        status: 'جديد',
+        sender_id: currentUserProfile.id,
+        sender_name: currentUserProfile.name,
+        user_id: currentUserProfile.id,
+        user_name: currentUserProfile.name,
+        created_at: now.toISOString(),
+        due_at: dueAt.toISOString(),
+        history_logs: initialHistory
+    };
+    const { data, error } = await supabaseClient.from('tickets').insert([payload]).select();
+    if (!error) {
+        statusEl.innerText = '✅ تم إرسال الطلب بنجاح إلى الباك أوفيس!';
+        statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-emerald-500/20 text-emerald-500 block';
+        document.getElementById('ticketZone').value = '';
+        document.getElementById('ticketNotes').value = '';
+        document.getElementById('ticketSiteTime').value = '';
+        fetchTickets();
+        setTimeout(() => statusEl.classList.add('hidden'), 4000);
+    } else {
+        statusEl.innerText = '❌ فشل الإرسال: ' + error.message;
+        statusEl.className = 'text-center text-xs font-bold p-2.5 rounded-xl bg-rose-500/20 text-rose-500 block';
+    }
+}
 
         function toggleFilterControls() {
             const container = document.getElementById('filterControlsContainer');
@@ -1065,44 +1216,34 @@
             }).join('');
         }
 
-        // تطبيق الفلترة حسب الأقسام الثلاثة المطلوبة بدقة
         function applyFilters() {
-            const searchName = document.getElementById('searchNameInput')?.value.trim().toLowerCase() || '';
             const searchType = document.getElementById('searchTypeInput')?.value.trim().toLowerCase() || '';
             const sortOption = document.getElementById('sortOption')?.value || 'date_desc';
             const viewCategory = document.getElementById('viewCategoryFilter')?.value || 'inbox';
-
             const now = new Date();
 
             let result = allFetchedTickets.filter(t => {
                 const status = t.status || 'جديد';
 
-                // 1. صندوق الوارد (Inbox): يحتاج تعديل + المكتملة أقل من 48 ساعة
                 if (viewCategory === 'inbox') {
                     const isEditNeeded = (status === 'يحتاج تعديل' || status === 'تعديل المطلوبة');
                     const isCompleted = (status === 'مكتملة' || status === 'مكتمل');
 
                     if (isEditNeeded) {
-                        // يظهر دائماً حتى يتم تعديله
                     } else if (isCompleted) {
                         const compTime = new Date(t.completed_at || t.updated_at || t.created_at);
                         const diffHours = (now - compTime) / (1000 * 60 * 60);
-                        if (diffHours > 48) return false; // يختفي بعد 48 ساعة من الإكمال
+                        if (diffHours > 48) return false;
                     } else {
                         return false;
                     }
                 } 
-                // 2. طلباتي (الحية الفعالة): جديد، قيد المعالجة، يحتاج تعديل، معلق/متوقفة
                 else if (viewCategory === 'my_tickets') {
                     const isLive = (status === 'جديد' || status === 'قيد المعالجة' || status === 'معلق' || status === 'متوقفة' || status === 'يحتاج تعديل' || status === 'تعديل المطلوبة');
                     if (!isLive) return false;
                 }
-                // 3. جميع الطلبات (all): كل الحالات
 
-                const title = (t.zone_address || t.title || '').toLowerCase();
                 const type = (t.ticket_type || '').toLowerCase();
-
-                if (searchName && !title.includes(searchName)) return false;
                 if (searchType && !type.includes(searchType)) return false;
 
                 if (selectedTimeFilter !== 'all') {
@@ -1118,8 +1259,6 @@
             result.sort((a, b) => {
                 if (sortOption === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
                 if (sortOption === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
-                if (sortOption === 'alpha_asc') return (a.zone_address || a.title || '').localeCompare(b.zone_address || b.title || '');
-                if (sortOption === 'alpha_desc') return (b.zone_address || b.title || '').localeCompare(a.zone_address || a.title || '');
                 return 0;
             });
 
@@ -1142,7 +1281,6 @@
             }
         }
 
-        // الاستماع اللحظي للطلبات والتحديثات من الأوفيس
         function setupRealtimeTickets() {
             supabaseClient
                 .channel('tickets-field-channel')
@@ -1195,7 +1333,6 @@
 
         function updateNotifUI() {
             const badge = document.getElementById('notifBadge');
-            const sidebarBadge = document.getElementById('sidebarNotifBadge');
             const unread = notificationsList.filter(n => !n.read);
 
             if (badge) {
@@ -1204,15 +1341,6 @@
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
-                }
-            }
-
-            if (sidebarBadge) {
-                if (unread.length > 0) {
-                    sidebarBadge.innerText = unread.length;
-                    sidebarBadge.classList.remove('hidden');
-                } else {
-                    sidebarBadge.classList.add('hidden');
                 }
             }
         }
@@ -1263,10 +1391,6 @@
             dismissTopAlert();
         }
 
-        /* ========================================================
-           دوال إدارة الملفات (تخزين ticket-files) مطابقة للأوفيس
-           ======================================================== */
-
      async function loadTicketFiles(ticketId) {
     const listContainer = document.getElementById('uploadedFilesList');
     if (!listContainer) return;
@@ -1282,7 +1406,7 @@
         if (error) throw error;
         const validFiles = (files || []).filter(f => f.name && f.name !== '.emptyFolderPlaceholder');
         if (validFiles.length === 0) {
-            listContainer.innerHTML = '<div class="text-slate-500 dark:text-slate-400 text-xs text-center py-2.5 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-[#3A6B68]/20">لا توجد ملفات مرفوعة لهذا الطلب من قبل الأوفيس.</div>';
+            listContainer.innerHTML = '<div class="text-slate-500 dark:text-slate-400 text-xs text-center py-2.5 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-[#3A6B68]/20">لا توجد ملفات مرفوعة لهذا الطلب بعد.</div>';
             return;
         }
         listContainer.innerHTML = validFiles.map(file => {
@@ -1324,7 +1448,6 @@
                             </span>
                         </div>
                     </div>
-                    <!-- أيقونة التحميل -->
                     <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-[#3A6B68] group-hover:text-white transition text-slate-600 dark:text-slate-300 shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -1338,55 +1461,6 @@
         listContainer.innerHTML = `<div class="text-rose-500 text-xs text-center py-2">تعذر تحميل سجل الملفات</div>`;
     }
 }
-
-        async function handleFileSelected(file) {
-            if (!file) return;
-
-            const activeTicketId = document.getElementById('modalCurrentTicketId')?.value;
-            const fileDisplaySpan = document.getElementById('selectedFileName');
-
-            if (!activeTicketId) {
-                alert('يرجى اختيار طلب صالح قبل الرفع.');
-                return;
-            }
-
-            if (fileDisplaySpan) {
-                fileDisplaySpan.innerText = `جاري رفع "${file.name}"... ⏳`;
-                fileDisplaySpan.className = 'text-[11px] text-[#3A6B68] font-bold block mt-1';
-            }
-
-            try {
-                const cleanName = file.name.replace(/\s+/g, '_');
-                const encodedUser = encodeURIComponent(currentUserProfile?.name || 'مشرف الميدان');
-                const uniqueFileName = `${Date.now()}__${encodedUser}__${cleanName}`;
-                const filePath = `${activeTicketId}/${uniqueFileName}`;
-
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from('ticket-files')
-                    .upload(filePath, file, { cacheControl: '3600', upsert: true });
-
-                if (error) throw error;
-
-                if (fileDisplaySpan) {
-                    fileDisplaySpan.innerText = `✅ تم رفع "${file.name}" بنجاح!`;
-                    setTimeout(() => { if (fileDisplaySpan) fileDisplaySpan.innerText = ''; }, 3500);
-                }
-
-                const fileInput = document.getElementById('fileInput');
-                if (fileInput) fileInput.value = '';
-
-                await loadTicketFiles(activeTicketId);
-
-            } catch (err) {
-                console.error('Upload Error:', err);
-                if (fileDisplaySpan) {
-                    fileDisplaySpan.innerText = `❌ فشل الرفع: ${err.message}`;
-                    fileDisplaySpan.className = 'text-[11px] text-rose-500 font-bold block mt-1';
-                }
-                alert('فشل رفع الملف: ' + err.message);
-            }
-        }
 
         async function triggerFileDownload(url, fileName) {
             try {
@@ -1411,34 +1485,7 @@
             }
         }
 
-        async function deleteTicketFile(ticketId, fileName, event) {
-            if (event) event.stopPropagation();
-
-            const confirmed = confirm('هل أنت متأكد من رغبتك في حذف هذا الملف نهائياً؟');
-            if (!confirmed) return;
-
-            try {
-                const fullPath = `${ticketId}/${fileName}`;
-                const { error } = await supabaseClient.storage.from('ticket-files').remove([fullPath]);
-                if (error) throw error;
-
-                alert('✅ تم حذف الملف بنجاح!');
-                await loadTicketFiles(ticketId);
-            } catch (err) {
-                console.error('خطأ في حذف الملف:', err);
-                alert('تعذر حذف الملف: ' + err.message);
-            }
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('border-[#3A6B68]', 'bg-[#3A6B68]/20');
-            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                handleFileSelected(e.dataTransfer.files[0]);
-            }
-        }
-
-        // فتح تفاصيل الطلب
+        // فتح تفاصيل الطلب وتحديث الخانة العلوية والموظف المستقبل الأول
         async function openTicketModal(ticketId) {
             const ticket = allFetchedTickets.find(t => t.id == ticketId);
             if (!ticket) return;
@@ -1446,22 +1493,46 @@
             document.getElementById('modalCurrentTicketId').value = ticket.id;
             document.getElementById('modalTicketId').innerText = ticket.ticket_number || '#00001';
             document.getElementById('modalTicketTitle').innerText = ticket.zone_address || ticket.title || '-';
-            document.getElementById('modalTicketType').innerText = ticket.ticket_type || '-';
+            
+            const tType = ticket.ticket_type || ticket.type || '-';
+            document.getElementById('modalTicketType').innerText = tType;
             
             const badgeElem = document.getElementById('modalTicketStatusBadge');
             badgeElem.innerText = ticket.status || 'جديد';
             badgeElem.className = `px-2 py-0.5 rounded-lg text-[11px] font-black inline-block mt-0.5 ${getStatusBadgeStyle(ticket.status || 'جديد')}`;
 
-            document.getElementById('modalTicketProcess').innerText = ticket.process_number || '-';
+            // تحديث اسم المسمى والمحتوى في الخانة العلوية حسب نوع الطلب
+            const procLabel = document.getElementById('modalTicketProcessLabel');
+            const procValElem = document.getElementById('modalTicketProcess');
+
+            if (tType === 'طلب تصريح دخول موقع') {
+                if (procLabel) procLabel.innerText = 'وقت وتاريخ الدخول';
+                if (procValElem) procValElem.innerText = ticket.SiteTime ? formatDateTime(ticket.SiteTime) : (ticket.process_number || '-');
+            } else if (tType === 'طلب سائق') {
+                if (procLabel) procLabel.innerText = 'وقت الشفت';
+                if (procValElem) procValElem.innerText = ticket.DriverShift || ticket.process_number || '-';
+            } else {
+                if (procLabel) procLabel.innerText = 'رقم البروسس';
+                if (procValElem) procValElem.innerText = ticket.process_number || '-';
+            }
+
             document.getElementById('modalTicketGov').innerText = ticket.governorate || '-';
             document.getElementById('modalFieldNotes').innerText = ticket.field_notes || ticket.notes || 'لا توجد ملاحظة';
             document.getElementById('modalOfficeNotes').innerText = ticket.office_notes || ticket.notes || 'لا توجد ملاحظات مدخلة حتى الآن من مكتب الدعم.';
             document.getElementById('modalElapsedTime').innerText = calculateElapsedTime(ticket.created_at);
 
-            const officeName = ticket.office_assignee_name || ticket.office_last_action_user || 'لم يستلم أحد الطلب بعد';
+            // تحديد الموظف المستقبل (أول موظف أوفيس استلم/اتخذ أكشن)
+            const logs = ticket.history_logs || [];
+            const sortedAscLogs = [...logs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const firstOfficeLog = sortedAscLogs.find(l => 
+                (l.author_id && l.author_id !== ticket.sender_id && l.author_id !== ticket.user_id) ||
+                (l.action && !l.action.includes('إنشاء الطلب'))
+            );
+
+            const officeName = firstOfficeLog ? firstOfficeLog.author : (ticket.office_assignee_name || ticket.office_last_action_user || 'غير محجوز بعد');
             document.getElementById('modalOfficeUser').innerText = officeName;
 
-            const officeId = ticket.office_assignee_id || ticket.office_last_action_id;
+            const officeId = firstOfficeLog ? firstOfficeLog.author_id : (ticket.office_assignee_id || ticket.office_last_action_id);
             if (officeId) {
                 const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', officeId).maybeSingle();
                 activeOfficeUser = prof || { full_name: officeName, job_title: 'Office Engineer', phone: '-', email: '-' };
@@ -1469,41 +1540,41 @@
                 activeOfficeUser = { full_name: officeName, job_title: 'Office Engineer', phone: '-', email: '-' };
             }
 
-            // قسم إعادة الإرسال للطلبات التي تحتاج تعديل
             const resubmitSec = document.getElementById('resubmitSection');
             if (ticket.status === 'يحتاج تعديل' || ticket.status === 'تعديل المطلوبة') {
                 resubmitSec.classList.remove('hidden');
-                document.getElementById('editTicketType').value = ticket.ticket_type || 'طلب دخول موقع';
+                document.getElementById('editTicketType').value = tType;
+                adjustEditFormByTicketType(tType);
+
                 document.getElementById('editTicketZone').value = ticket.zone_address || ticket.title || '';
-                document.getElementById('editTicketProcess').value = ticket.process_number || '24';
-                document.getElementById('editTicketGov').value = ticket.governorate || 'بغداد';
+                document.getElementById('editTicketProcess').value = ticket.process_number || '';
+                if (ticket.DriverShift) document.getElementById('editTicketDriverShift').value = ticket.DriverShift;
+                if (ticket.SiteTime) document.getElementById('editTicketSiteTime').value = ticket.SiteTime;
+                document.getElementById('editTicketGov').value = ticket.governorate || '';
                 document.getElementById('editTicketNotes').value = '';
             } else {
                 resubmitSec.classList.add('hidden');
             }
 
-            // سجل التغييرات
             renderTimelineLogs(ticket);
-
-            // تحميل الملفات من الباكت
             loadTicketFiles(ticket.id);
 
             document.getElementById('ticketDetailModal').classList.remove('hidden');
         }
 
+        // عرض السجلات وتجنب تكرار سجل الإنشاء
         function renderTimelineLogs(ticket) {
             const timeline = document.getElementById('modalTimeline');
-            const logs = ticket.history_logs || ticket.history || [];
+            const logs = ticket.history_logs || [];
             
-            const allEvents = [...logs];
-            if (ticket.created_at && !allEvents.some(e => e.isCreation)) {
+            let allEvents = [...logs];
+            if (allEvents.length === 0 && ticket.created_at) {
                 allEvents.push({
                     timestamp: ticket.created_at,
                     author: ticket.sender_name || ticket.user_name || 'مشرف الميدان',
                     author_id: ticket.sender_id || ticket.user_id,
                     action: 'إنشاء الطلب وإرساله إلى الباك أوفيس',
-                    notes: ticket.field_notes || '',
-                    isCreation: true
+                    notes: ticket.field_notes || ''
                 });
             }
 
@@ -1532,52 +1603,92 @@
             document.getElementById('ticketDetailModal').classList.add('hidden');
         }
 
-        // دالة إعادة إرسال الطلب بعد التعديل
-        async function resubmitTicket() {
-            const ticketId = document.getElementById('modalCurrentTicketId').value;
-            const newType = document.getElementById('editTicketType').value;
-            const newZone = document.getElementById('editTicketZone').value;
-            const newProcess = document.getElementById('editTicketProcess').value;
-            const newGov = document.getElementById('editTicketGov').value;
-            const editNotes = document.getElementById('editTicketNotes').value;
+     async function resubmitTicket() {
+    const ticketId = document.getElementById('modalCurrentTicketId').value;
+    const newType = document.getElementById('editTicketType').value;
+    const newZone = document.getElementById('editTicketZone').value.trim();
+    const newGov = document.getElementById('editTicketGov').value;
+    const editNotes = document.getElementById('editTicketNotes').value.trim();
 
-            const ticket = allFetchedTickets.find(t => t.id == ticketId);
-            if (!ticket) return;
+    // --- التحقق الإجباري عند التعديل ---
+    if (!newType) {
+        alert('⚠️ يرجى اختيار نوع الطلب');
+        return;
+    }
 
-            const currentLogs = ticket.history_logs || [];
-            const nowIso = new Date().toISOString();
+    if (!newZone) {
+        alert('⚠️ يرجى كتابة اسم/رقم الموقع أو الزون');
+        return;
+    }
 
-            const newLog = {
-                timestamp: nowIso,
-                author: currentUserProfile.name,
-                author_id: currentUserProfile.id,
-                action: 'تعديل بيانات الطلب وإعادة الإرسال إلى الأوفيس',
-                notes: editNotes || ''
-            };
+    let processVal = '-';
+    let driverShiftVal = null;
+    let siteTimeVal = null;
 
-            const updatedLogs = [newLog, ...currentLogs];
-
-            const payload = {
-                ticket_type: newType,
-                zone_address: newZone,
-                zone_number: newZone,
-                process_number: newProcess,
-                governorate: newGov,
-                field_notes: editNotes || ticket.field_notes,
-                status: 'جديد',
-                history_logs: updatedLogs,
-                updated_at: nowIso
-            };
-
-            const { error } = await supabaseClient.from('tickets').update(payload).eq('id', ticketId);
-            if (!error) {
-                alert('✅ تم تحديث الطلب وإعادة إرساله بنجاح!');
-                closeTicketModal();
-                fetchTickets();
-            } else {
-                alert('❌ فشل التحديث: ' + error.message);
-            }
+    if (newType === 'طلب تصريح دخول موقع') {
+        siteTimeVal = document.getElementById('editTicketSiteTime').value;
+        if (!siteTimeVal) {
+            alert('⚠️ يرجى تحديد وقت وتاريخ الدخول');
+            return;
         }
+    } else if (newType === 'طلب سائق') {
+        driverShiftVal = document.getElementById('editTicketDriverShift').value;
+        if (!driverShiftVal) {
+            alert('⚠️ يرجى اختيار وقت الشفت للسائق');
+            return;
+        }
+    } else {
+        processVal = document.getElementById('editTicketProcess').value;
+        if (!processVal) {
+            alert('⚠️ يرجى اختيار رقم البروسس');
+            return;
+        }
+    }
+
+    if (!newGov) {
+        alert('⚠️ يرجى اختيار المحافظة');
+        return;
+    }
+
+    const ticket = allFetchedTickets.find(t => t.id == ticketId);
+    if (!ticket) return;
+
+    const currentLogs = ticket.history_logs || [];
+    const nowIso = new Date().toISOString();
+
+    const newLog = {
+        timestamp: nowIso,
+        author: currentUserProfile.name,
+        author_id: currentUserProfile.id,
+        action: 'تعديل بيانات الطلب وإعادة الإرسال إلى الأوفيس',
+        notes: editNotes || ''
+    };
+
+    const updatedLogs = [newLog, ...currentLogs];
+
+    const payload = {
+        ticket_type: newType,
+        zone_address: newZone,
+        zone_number: newZone,
+        process_number: processVal,
+        DriverShift: driverShiftVal,
+        SiteTime: siteTimeVal,
+        governorate: newGov,
+        field_notes: editNotes || ticket.field_notes,
+        status: 'جديد',
+        history_logs: updatedLogs,
+        updated_at: nowIso
+    };
+
+    const { error } = await supabaseClient.from('tickets').update(payload).eq('id', ticketId);
+    if (!error) {
+        alert('✅ تم تحديث الطلب وإعادة إرساله بنجاح!');
+        closeTicketModal();
+        fetchTickets();
+    } else {
+        alert('❌ فشل التحديث: ' + error.message);
+    }
+}
 
         function openOfficeUserContactModal() {
             if (!activeOfficeUser) return;
@@ -1613,10 +1724,27 @@
             }
         }
 
+        // جلب داتا الحساب الشخصي بدقة بحسب الشرطين المطلوبين
         async function loadProfileData() {
-            const { data: tickets } = await supabaseClient.from('tickets').select('*').or(`user_id.eq.${currentUserProfile.id},sender_id.eq.${currentUserProfile.id}`);
-            const total = tickets ? tickets.length : 0;
-            const active = tickets ? tickets.filter(t => t.status !== 'مكتملة' && t.status !== 'مكتمل' && t.status !== 'ملغي').length : 0;
+            const { data: tickets } = await supabaseClient.from('tickets').select('*');
+            
+            let totalSent = 0;
+            let completedCount = 0;
+
+            if (tickets) {
+                // 1. الطلبات المرسلة من هذا الحساب (عامود 3 بالجدول)
+                totalSent = tickets.filter(t => 
+                    (t.sender_id && t.sender_id === currentUserProfile.id) ||
+                    (t.sender_name && t.sender_name === currentUserProfile.name) ||
+                    (t.user_id && t.user_id === currentUserProfile.id)
+                ).length;
+
+                // 2. الطلبات المنجزة المكتملة
+                completedCount = tickets.filter(t => 
+                    ((t.sender_id === currentUserProfile.id) || (t.user_id === currentUserProfile.id)) &&
+                    (t.status === 'مكتملة' || t.status === 'مكتمل')
+                ).length;
+            }
 
             document.getElementById('profileFullName').innerText = currentUserProfile.name || '-';
             document.getElementById('profileJobTitle').innerText = currentUserProfile.role || '-';
@@ -1625,8 +1753,8 @@
             document.getElementById('profilePhone').innerText = currentUserProfile.phone || '-';
             document.getElementById('profileEmail').innerText = currentUserProfile.email || '-';
             document.getElementById('profileGender').innerText = currentUserProfile.gender || 'Male';
-            document.getElementById('profileActiveCount').innerText = `${active} طلب`;
-            document.getElementById('profileTotalCount').innerText = `${total} طلب`;
+            document.getElementById('profileActiveCount').innerText = `${completedCount} مكتملة`;
+            document.getElementById('profileTotalCount').innerText = `${totalSent} طلب`;
         }
 
         function openSidebar() {
@@ -1659,14 +1787,15 @@ function openChangePasswordModal() {
     if (msg) msg.classList.add('hidden');
     document.getElementById('changePasswordModal').classList.remove('hidden');
 }
-// 2. إغلاق النوافذ
+
 function closeChangePasswordModal() {
     document.getElementById('changePasswordModal').classList.add('hidden');
 }
+
 function closeConfirmChangePassModal() {
     document.getElementById('confirmChangePassModal').classList.add('hidden');
 }
-// 3. إظهار / إخفاء الرمز السري
+
 function togglePassView(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
@@ -1678,7 +1807,7 @@ function togglePassView(inputId, iconId) {
         icon.innerText = '👁️';
     }
 }
-// 4. التحقق من المدخلات وفتح نافذة التأكيد
+
 function handlePreChangePassword(e) {
     if (e) e.preventDefault();
     const oldPassword = document.getElementById('oldPasswordInput').value.trim();
@@ -1706,10 +1835,9 @@ function handlePreChangePassword(e) {
         return;
     }
     msg.classList.add('hidden');
-    // فتح نافذة التأكيد
     document.getElementById('confirmChangePassModal').classList.remove('hidden');
 }
-// 5. التحقق من صحة الرمز القديم في السيرفر + تغيير الرمز + إنهاء الجلسة والخروج
+
 async function executePasswordChangeAndLogout() {
     const oldPassword = document.getElementById('oldPasswordInput').value.trim();
     const newPassword = document.getElementById('newPasswordInput').value.trim();
@@ -1718,7 +1846,6 @@ async function executePasswordChangeAndLogout() {
     btn.disabled = true;
     btn.innerText = 'جاري التحقق والتحديث... ⏳';
     try {
-        // أ) التحقق من صحة كلمة المرور القديمة عبر إعادة توثيق الدخول المؤقت
         const userEmail = currentUserProfile.email;
         const { error: verifyError } = await supabaseClient.auth.signInWithPassword({
             email: userEmail,
@@ -1732,16 +1859,13 @@ async function executePasswordChangeAndLogout() {
             btn.innerText = 'نعم، تغيير وخروج';
             return;
         }
-        // ب) تحديث كلمة المرور في سيرفر Supabase بالرمز الجديد
         const { error: updateError } = await supabaseClient.auth.updateUser({
             password: newPassword
         });
         if (updateError) throw updateError;
-        // ج) تسجيل الخروج وإنهاء الجلسة فوراً
         await supabaseClient.auth.signOut();
         alert('✅ تم تغيير الرمز السري بنجاح!\nسيتم تحويلك الآن لتسجيل الدخول بكلمة المرور الجديدة.');
         
-        // إعادة تحميل الصفحة للانتقال إلى شاشة الدخول
         location.reload();
     } catch (err) {
         console.error('Password change error:', err);
@@ -1760,48 +1884,59 @@ async function executePasswordChangeAndLogout() {
             else { passInput.type = 'password'; passEye.innerText = '👁️'; }
         }
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-                if (error) throw error;
-                
-                if (rememberMe) {
-                    localStorage.setItem('sana_field_saved_email', email);
-                } else {
-                    localStorage.removeItem('sana_field_saved_email');
-                }
-
-                const user = data.user;
-                currentUserProfile.id = user.id;
-
-                const { data: profileData } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
-                if (profileData) {
-                    currentUserProfile.name = profileData.full_name || email.split('@')[0];
-                    currentUserProfile.email = user.email;
-                    currentUserProfile.role = profileData.job_title || 'Site Supervisor';
-                    currentUserProfile.governorate = profileData.governorate || '-';
-                    currentUserProfile.phone = profileData.phone || '-';
-                    currentUserProfile.manager = profileData.direct_manager || '-';
-                    currentUserProfile.gender = profileData.gender || 'Male';
-                } else {
-                    currentUserProfile.name = email.split('@')[0];
-                    currentUserProfile.email = user.email;
-                }
-
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('mainHeader').classList.remove('hidden');
-                document.getElementById('mainLogoBanner').classList.remove('hidden');
-                navigateTo('home');
-                setupRealtimeTickets();
-            } catch (err) { alert('فشل تسجيل الدخول: ' + err.message); }
+       async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    try {
+        // 1. تسجيل الدخول
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        const user = data.user;
+        // 2. جلب الـ role من جدول profiles
+        const { data: profileData } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+        const userRole = profileData?.role || '';
+        // 3. شرط الصلاحية: يسمح فقط لـ field و hybrid
+        if (userRole !== 'field' && userRole !== 'hybrid') {
+            // تسجيل الخروج لمنع الحفظ والبقاء في شاشة الدخول
+            await supabaseClient.auth.signOut();
+            alert('🚫 عذراً! هذا الحساب لا يملك تصريحاً للوصول إلى بوابة المشرف الموقعي (Field).');
+            return;
         }
+        // 4. إكمال الدخول لليوزر المصرح له
+        currentUserProfile.id = user.id;
+        if (profileData) {
+            currentUserProfile.name = profileData.full_name || email.split('@')[0];
+            currentUserProfile.email = user.email;
+            currentUserProfile.role = profileData.job_title || 'Site Supervisor';
+            currentUserProfile.governorate = profileData.governorate || '-';
+            currentUserProfile.phone = profileData.phone || '-';
+            currentUserProfile.manager = profileData.direct_manager || '-';
+            currentUserProfile.gender = profileData.gender || 'Male';
+        } else {
+            currentUserProfile.name = email.split('@')[0];
+            currentUserProfile.email = user.email;
+        }
+        if (rememberMe) {
+            localStorage.setItem('sana_field_saved_email', email);
+        } else {
+            localStorage.removeItem('sana_field_saved_email');
+        }
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('mainHeader').classList.remove('hidden');
+        document.getElementById('mainLogoBanner').classList.remove('hidden');
+        navigateTo('home');
+        setupRealtimeTickets();
+    } catch (err) { 
+        alert('فشل تسجيل الدخول: ' + err.message); 
+    }
+}
 
-        // استعادة البريد المحفوظ
         document.addEventListener('DOMContentLoaded', () => {
             const savedEmail = localStorage.getItem('sana_field_saved_email');
             if (savedEmail) {
@@ -1814,4 +1949,3 @@ async function executePasswordChangeAndLogout() {
     </script>
 </body>
 </html>
-```
