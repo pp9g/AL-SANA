@@ -384,7 +384,7 @@
                     </div>
 
                     <div class="grafana-card">
-                        <span class="text-xs font-black text-rose-600 dark:text-rose-400" data-i18n="chartStopped">متوقفة (Hold)</span>
+                        <span class="text-xs font-black text-rose-600 dark:text-rose-400" data-i18n="chartStopped">متوقفة </span>
                         <div class="grafana-chart-wrapper">
                             <canvas id="chartHoldCanvas"></canvas>
                             <div class="grafana-val-container text-rose-600 dark:text-rose-400">
@@ -561,7 +561,7 @@
                                 <input type="text" id="searchSenderInput" oninput="applyFilters()" placeholder="صاحب الحساب المرسل" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="assigneeLabel">👨‍💼 الأوفيس المستلم</label>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-400 mb-1" data-i18n="assigneeLabel">👨‍💼 الموظف المستلم</label>
                                 <input type="text" id="searchAssigneeInput" oninput="applyFilters()" placeholder="الحساب المستلم" class="ios-input p-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold focus:outline-none">
                             </div>
                             <div>
@@ -616,7 +616,7 @@
                                     </label>
                                     <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
                                         <input type="checkbox" value="معلق" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
-                                        <span>متوقفة (Hold)</span>
+                                        <span>متوقفة </span>
                                     </label>
                                     <label class="flex items-center gap-2 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
                                         <input type="checkbox" value="يحتاج تعديل" onchange="handleStatusCheckboxChange(this)" class="status-checkbox w-4 h-4 accent-[#3A6B68]">
@@ -767,7 +767,7 @@
 
                                     <th class="p-3 text-right">
                                         <div class="flex flex-col gap-1">
-                                            <span>11. الحساب المنجز (آخر أكشن)</span>
+                                            <span>11. الموظف المنجز </span>
                                             <select onchange="sortTable('office_last_action_user', this.value)" class="bg-[#2E5553] text-white text-[10px] rounded-xl p-1.5 border border-white/20 focus:outline-none cursor-pointer font-bold">
                                                 <option value="default" data-i18n="sortLabel">الترتيب</option>
                                                 <option value="asc_str" data-i18n="sortAZ">a-z</option>
@@ -789,7 +789,9 @@
 
             <div id="profileView" class="hidden w-full max-w-4xl mx-auto space-y-6 text-right">
                 <div class="ios-card bg-white dark:bg-slate-900/90 p-8 border border-slate-300 dark:border-slate-800 space-y-6 shadow-xl">
-                    <h2 class="text-xl font-black text-[#3A6B68] dark:text-[#4B8581] border-b border-slate-300 dark:border-slate-800 pb-4" data-i18n="profileHeader">👤 معلومات الحساب الشخصي</h2>
+    <h2 class="text-xl font-black text-[#3A6B68] dark:text-[#4B8581]" data-i18n="profileHeader">👤 معلومات الحساب الشخصي</h2>
+        <span id="profilerole" class="text-xs font-black px-3 py-1.5 rounded-full bg-[#3A6B68]/10 text-[#3A6B68] dark:bg-[#4B8581]/15 dark:text-[#4B8581] border border-[#3A6B68]/30 dark:border-[#4B8581]/30 whitespace-nowrap"></span>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="fullName">الاسم الكامل</label>
                         <div id="profileFullName" class="ios-input p-3.5 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-black text-[#3A6B68] dark:text-[#4B8581] flex items-center justify-center"></div>
@@ -816,11 +818,11 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblCompleted">الطلبات المنجزة (آخر أكشن)</label>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblCompleted">الطلبات المنجزة</label>
                             <div id="profileCompletedCount" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-emerald-600 dark:text-emerald-400">0 مكتملة</div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblSent">الطلبات المرسلة من هذا الحساب</label>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1.5" data-i18n="lblSent">الطلبات المرسلة   </label>
                             <div id="profileTotalSent" class="ios-input p-4 bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 text-sm font-bold text-black dark:text-slate-200">0 طلب</div>
                         </div>
                     </div>
@@ -897,10 +899,7 @@
                         <div id="modalProfilePhone" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200 font-mono">-</div>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1" data-i18n="lblEmail">البريد الإلكتروني</label>
-                    <div id="modalProfileEmail" class="ios-input p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-black dark:text-slate-200 font-mono truncate">-</div>
-                </div>
+                
             </div>
             <div class="pt-2">
                 <button onclick="closeUserProfileModal()" class="ios-button w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-3" data-i18n="closeBtn">إغلاق</button>
@@ -951,7 +950,7 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">ملاحظة الفيلد (Field Note)</label>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1"> ملاحظظات فريق الموقع : </label>
                 <div id="dtModalFieldNotes" class="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-300 min-h-[48px] whitespace-pre-line text-xs">
                     -
                 </div>
@@ -999,15 +998,15 @@
                 <select id="dtModalStatus" class="ios-input w-full p-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-bold text-black dark:text-slate-200 rounded-xl focus:outline-none cursor-pointer">
                     <option value="جديد" id="optNewStatusOption" data-i18n="optNew">جديد</option>
                     <option value="قيد المعالجة" data-i18n="optInProc">قيد المعالجة</option>
-                    <option value="معلق" data-i18n="optHold">متوقفة (Hold)</option>
+                    <option value="معلق" data-i18n="optHold">متوقف</option>
                     <option value="يحتاج تعديل" data-i18n="optNeedsUpdate">يحتاج تعديل</option>
-                    <option value="مكتملة" data-i18n="optCompleted">مكتملة</option>
+                    <option value="مكتمل" data-i18n="optCompleted">مكتمل</option>
                     <option value="ملغي" data-i18n="optCanceled">ملغي</option>
                 </select>
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button onclick="saveAndSendTicketUpdate()" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-bold py-3.5 shadow-lg" data-i18n="btnSaveSend">حفظ التغييرات وإرسال الطلب للفيلد</button>
+                <button onclick="saveAndSendTicketUpdate()" class="ios-button flex-1 bg-[#3A6B68] hover:bg-[#2E5553] text-white text-xs font-bold py-3.5 shadow-lg" data-i18n="btnSaveSend">  حفظ التغيير  </button>
                 <button onclick="closeTicketDetailModal()" class="ios-button flex-1 bg-slate-300 dark:bg-slate-800 hover:bg-slate-400 text-black dark:text-slate-300 text-xs font-bold py-3.5" data-i18n="cancel">إلغاء</button>
             </div>
         </div>
@@ -1116,7 +1115,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
                 yesLogout: "نعم، خروج", cancel: "إلغاء", totalCount: "إجمالي العدد:", closeBtn: "إغلاق ✕", backBtn: "رجوع", customAlerts: "تخصيص تنبيهات SANA",
                 notifNewTickets: "1. الطلبات الجديدة", notifStatusUpdates: "2. تحديثات وتغيير الحالة", notifSlaAlerts: "3. تنبيهات الـ SLA والنظام",
                 ticketNumLabel: "🔢 رقم الطلب", zoneNameLabel: "📍 اسم الزون", ticketTypeLabel: "🏷️ نوع الطلب", senderLabel: "👤 المرسل", assigneeLabel: "👨‍💼 الأوفيس المستلم", statusLabel: "📌 حالة الطلب",
-                optAll: "الكل", optNew: "جديد", optInProc: "قيد المعالجة", optHold: "متوقفة (Hold)", optNeedsUpdate: "يحتاج تعديل", optCompleted: "مكتملة",
+                optAll: "الكل", optNew: "جديد", optInProc: "قيد المعالجة", optHold: "متوقف", optNeedsUpdate: "يحتاج تعديل", optCompleted: "مكتمل",
                 dateFromLabel: "📅 من (تاريخ ووقت)", dateToLabel: "📅 إلى (تاريخ ووقت)", chartPending: "قيد الانتظار / الجديدة", chartProcessing: "قيد المعالجة", chartNeedsUpdate: "تحتاج تحديث",
                 chartStopped: "المتوقفة", chartTotal: "إجمالي الطلبات", thTicketNum: "1. رقم الطلب", thSender: "3. المرسل", thType: "4. نوع الطلب",
                 thZoneAddress: "5. عنوان الزون", thSlaTime: "7. وقت SLA / التاريخ", thStatus: "8. حالة الطلب",
@@ -1124,7 +1123,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
                 profileHeader: "👤 معلومات الحساب الشخصي", lblCompleted: "الطلبات المنجزة (آخر أكشن)", lblSent: "الطلبات المرسلة من هذا الحساب", lblGender: "الجنس", btnChangePass: "تغيير الرمز السري",
                 notifCenterTitle: "مركز الإشعارات والتنبيهات", btnClearAll: "مسح الكل", noNotifications: "لا توجد إشعارات جديدة حالياً", userFullDetails: "تفاصيل الحساب الكاملة", fullTicketDetails: "تفاصيل الطلب الكاملة",
                 attachFiles: "إرفاق الملفات (Drag & Drop أو تصفح)", dragFiles: "اسحب الملفات هنا أو اضغط للتصفح والرفع", addComment: "إضافة تعليق / إجراء جديد", historyLogHeader: "📜 سجل التغييرات والأحداث السابقة (الأحدث في الأعلى)",
-                noLogs: "لا توجد سجلات بعد.", btnSaveSend: "حفظ التغييرات وإرسال الطلب للفيلد", lblNewPass: "كلمة المرور الجديدة", btnSave: "حفظ التغيير", unassignedClaim: "غير محجوز"
+                noLogs: "لا توجد سجلات بعد.", btnSaveSend: " حفظ التغيير   ", lblNewPass: "كلمة المرور الجديدة", btnSave: "حفظ التغيير", unassignedClaim: "غير محجوز"
             },
             en: {
                 navHome: "Home Page", navProfile: "My Profile", navNotificationSettings: "Notification Settings", btnLogout: "Logout",
@@ -1158,13 +1157,13 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
         let sessionTimerInterval = null;
 
         let notificationSettings = { newTickets: true, statusUpdates: true, slaSystem: true };
+        let sharedAudioContext = null;
         let currentUserProfile = { id: '', name: '', role: 'Office Engineer', email: '', manager: '-', phone: '-', governorate: '-', gender: 'Male', completedCount: 0, totalSent: 0 };
 
         let chartInstances = {};
 
       window.addEventListener('DOMContentLoaded', async () => {
     setupRealtimeTickets();
-    loadStoredNotifications();
     loadNotificationSettings();
     startSessionTimer();
     initGrafanaCharts();
@@ -1185,12 +1184,15 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
             if (profileData) {
                 currentUserProfile.name = profileData.full_name || user.email.split('@')[0];
                 currentUserProfile.email = user.email;
+                currentUserProfile.accountType = userRole;
                 currentUserProfile.role = profileData.job_title || 'Office Engineer';
                 currentUserProfile.governorate = profileData.governorate || '-';
                 currentUserProfile.phone = profileData.phone || '-';
                 currentUserProfile.manager = profileData.direct_manager || '-';
                 currentUserProfile.gender = profileData.gender || 'Male';
+                
             }
+            loadStoredNotifications();
             setupOfficeHeaderInfo();
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainAppWrapper').classList.remove('hidden');
@@ -1550,6 +1552,7 @@ function setupRealtimeTickets() {
             currentUserProfile.phone = profileData.phone || '-';
             currentUserProfile.manager = profileData.direct_manager || '-';
             currentUserProfile.gender = profileData.gender || 'Male';
+            currentUserProfile.accountType = userRole;
         } else {
             currentUserProfile.name = user.email.split('@')[0];
         }
@@ -1558,6 +1561,7 @@ function setupRealtimeTickets() {
         } else {
             localStorage.removeItem('sana_saved_email');
         }
+        loadStoredNotifications();
         setupOfficeHeaderInfo();
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('mainAppWrapper').classList.remove('hidden');
@@ -1592,21 +1596,11 @@ function setupRealtimeTickets() {
                 ).length;
 
                 // 2. الطلبات المنجزة تمثل اخر عامود في الجدول عدد الطلبات اللي انجزهه الموظف الاوفس (عدد ظهور اسمه في العامود كآخر إجراء)
-                const completedTicketsCount = tickets.filter(t => {
-                    const logs = t.history_logs || [];
-                    const sortedDesc = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    
-                    let lastUser = t.office_last_action_user || t.office_assignee_name || '';
-                    let lastUserId = t.office_last_action_id || t.office_assignee_id || '';
-
-                    if (sortedDesc.length > 0) {
-                        lastUser = sortedDesc[0].author || sortedDesc[0].user_name || lastUser;
-                        lastUserId = sortedDesc[0].author_id || sortedDesc[0].user_id || lastUserId;
-                    }
-
-                    const isMatchUser = (lastUserId && lastUserId === currentUserProfile.id) || 
-                                        (lastUser && lastUser === currentUserProfile.name);
-                                        
+                    const completedTicketsCount = tickets.filter(t => {
+                    // نفس دالة "آخر أكشن فعلي" المستخدمة في الجدول (تستثني الإرسال + الطلبات الملغية)
+                    const lastAction = getLastRealAction(t);
+                    const isMatchUser = (lastAction.id && lastAction.id === currentUserProfile.id) ||
+                                        (lastAction.name && lastAction.name !== '-' && lastAction.name === currentUserProfile.name);
                     return isMatchUser;
                 }).length;
 
@@ -1616,6 +1610,8 @@ function setupRealtimeTickets() {
 
             document.getElementById('profileFullName').innerText = currentUserProfile.name || '-';
             document.getElementById('profileJobTitle').innerText = currentUserProfile.role || '-';
+            document.getElementById('profilerole').innerText = currentUserProfile.accountType || '-';
+
             document.getElementById('profileManager').innerText = currentUserProfile.manager || '-';
             document.getElementById('profileGovernorate').innerText = currentUserProfile.governorate || '-';
             document.getElementById('profilePhone').innerText = currentUserProfile.phone || '-';
@@ -1658,14 +1654,12 @@ function setupRealtimeTickets() {
                     document.getElementById('modalProfileManager').innerText = profile.direct_manager || '-';
                     document.getElementById('modalProfileGov').innerText = profile.governorate || '-';
                     document.getElementById('modalProfilePhone').innerText = profile.phone || '-';
-                    document.getElementById('modalProfileEmail').innerText = profile.email || '-';
                 } else {
                     document.getElementById('modalProfileName').innerText = 'غير متوفر في قاعدة البيانات';
                     document.getElementById('modalProfileJob').innerText = '-';
                     document.getElementById('modalProfileManager').innerText = '-';
                     document.getElementById('modalProfileGov').innerText = '-';
                     document.getElementById('modalProfilePhone').innerText = '-';
-                    document.getElementById('modalProfileEmail').innerText = '-';
                 }
                 document.getElementById('userProfileModal').classList.remove('hidden');
             } catch (err) { 
@@ -1895,7 +1889,7 @@ function handleDrop(e) {
             document.getElementById('dtModalType').innerText = ticketType;
             document.getElementById('dtModalZoneNumber').innerText = ticket.zone_number || ticket.zone_address || '-';
             document.getElementById('dtModalGovernorate').innerText = ticket.governorate || ticket.city || '-';
-            document.getElementById('dtModalFieldNotes').innerText = ticket.field_notes || ticket.notes || ticket.description || 'لا توجد ملاحظات مدخلة من قبل تيم الفيلد.';
+            document.getElementById('dtModalFieldNotes').innerText = ticket.field_notes || ticket.notes || ticket.description || 'لا توجد ملاحظات مدخلة من قبل فريق الموقع.';
             
             // إضافة وقت وتاريخ الدخول أو وقت الشفت أو رقم البروسس بالصدارة
             const procLabel = document.getElementById('dtModalProcessLabel');
@@ -1947,7 +1941,7 @@ function handleDrop(e) {
                 if (saveBtn) {
                     saveBtn.disabled = false;
                     saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    saveBtn.innerText = translations[currentLang].btnSaveSend || "حفظ التغييرات وإرسال الطلب للفيلد";
+                    saveBtn.innerText = translations[currentLang].btnSaveSend || "حفظ التغيير ";
                 }
             }
 
@@ -1976,7 +1970,7 @@ function handleDrop(e) {
                     timestamp: ticket.created_at,
                     author: ticket.sender_name || ticket.user_name || 'مشرف الميدان',
                     author_id: ticket.sender_id || ticket.user_id || null,
-                    action: 'إنشاء الطلب وإرساله إلى الباك أوفيس',
+                    action: 'إنشاء الطلب وإرساله إلى  المكتب',
                     notes: ticket.field_notes || ticket.notes || ''
                 });
             }
@@ -2045,6 +2039,7 @@ function handleDrop(e) {
             
             if (fileUrl) updatePayload.file_url = fileUrl;
             if (newStatus === 'مكتملة' || newStatus === 'مكتمل') updatePayload.completed_at = new Date().toISOString();
+            if (newStatus === 'ملغي' || newStatus === 'Canceled') updatePayload.canceled_at = new Date().toISOString();
 
             const { error } = await supabaseClient.from('tickets').update(updatePayload).eq('id', ticketId);
             if (!error) {
@@ -2065,38 +2060,83 @@ function handleDrop(e) {
             }
         }
 
-        function formatSlaDuration(targetDate, isCompleted, completedAtDate) {
-            const due = new Date(targetDate);
-            
-            if (isCompleted) {
-                const finishTime = completedAtDate ? new Date(completedAtDate) : new Date();
-                const diffMs = due - finishTime;
-                
+        // الحالات التي تُجمّد (توقف مؤقتاً) عداد الـ SLA
+        const SLA_FREEZE_STATUSES = ['معلق', 'Hold', 'يحتاج تعديل'];
+
+        // يحسب مجموع الوقت المجمّد بالميلي ثانية بالاعتماد على سجل تغييرات الحالة history_logs
+        function calculateFrozenSlaMs(historyLogs, referenceTime) {
+            if (!historyLogs || historyLogs.length === 0) return 0;
+
+            // ترتيب تصاعدي لمعرفة بداية ونهاية كل فترة حالة
+            const sortedLogs = [...historyLogs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            let frozenMs = 0;
+            for (let i = 0; i < sortedLogs.length; i++) {
+                const match = sortedLogs[i].action && sortedLogs[i].action.match(/تغيير الحالة إلى: \[(.+?)\]/);
+                const statusAtThisPoint = match ? match[1].trim() : null;
+                if (!statusAtThisPoint || !SLA_FREEZE_STATUSES.includes(statusAtThisPoint)) continue;
+
+                const periodStart = new Date(sortedLogs[i].timestamp).getTime();
+                const periodEnd = (i + 1 < sortedLogs.length)
+                    ? new Date(sortedLogs[i + 1].timestamp).getTime()
+                    : referenceTime.getTime();
+
+                if (periodEnd > periodStart) frozenMs += (periodEnd - periodStart);
+            }
+            return frozenMs;
+        }
+
+        function formatSlaDuration(ticket) {
+            const rawDue = new Date(ticket.due_at || ticket.created_at || new Date());
+            const status = ticket.status;
+
+            const isCompleted = (status === 'مكتملة' || status === 'مكتمل');
+            const isCanceled  = (status === 'ملغي' || status === 'Canceled');
+            const isFrozenNow = SLA_FREEZE_STATUSES.includes(status);
+
+            // 1) مكتمل أو ملغي: العداد يتوقف نهائياً عند لحظة الإكمال/الإلغاء
+            if (isCompleted || isCanceled) {
+                const finishTime = isCompleted
+                    ? (ticket.completed_at ? new Date(ticket.completed_at) : new Date())
+                    : (ticket.canceled_at  ? new Date(ticket.canceled_at)  : new Date());
+
+                const frozenMs = calculateFrozenSlaMs(ticket.history_logs, finishTime);
+                const effectiveDue = new Date(rawDue.getTime() + frozenMs);
+                const diffMs = effectiveDue - finishTime;
+
                 if (diffMs < 0) {
                     const absMs = Math.abs(diffMs);
                     const totalMinutes = Math.floor(absMs / (1000 * 60));
                     const hours = Math.floor(totalMinutes / 60);
                     const minutes = totalMinutes % 60;
                     return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30 whitespace-nowrap">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
-                } else {
-                    return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs whitespace-nowrap">${currentLang === 'ar' ? 'تم الانجاز' : 'Done'}</span>`;
                 }
+                if (isCanceled) {
+                    return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-pink-500/20 text-pink-700 dark:text-pink-400 border border-pink-500/30 whitespace-nowrap">${currentLang === 'ar' ? 'ملغي' : 'Canceled'}</span>`;
+                }
+                return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs whitespace-nowrap">${currentLang === 'ar' ? 'تم الانجاز' : 'Done'}</span>`;
             }
 
+            // 2) الطلب متوقف حالياً (معلق) أو بانتظار تعديل الفلد: نجمّد العرض ولا نحسب وقتاً متحركاً
+            if (isFrozenNow) {
+                return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-slate-500/20 text-slate-600 dark:text-slate-300 border border-slate-500/30 whitespace-nowrap">⏸️ ${status === '-' ? '-' : '-'}</span>`;
+            }
+
+            // 3) الطلب لا يزال نشطاً (جديد / قيد المعالجة): نحسب الوقت المتبقي أو المتأخر مع إضافة فترات التجميد السابقة
             const now = new Date();
-            const diffMs = due - now;
+            const frozenMs = calculateFrozenSlaMs(ticket.history_logs, now);
+            const effectiveDue = new Date(rawDue.getTime() + frozenMs);
+            const diffMs = effectiveDue - now;
             const isLate = diffMs < 0;
             const absMs = Math.abs(diffMs);
-
             const totalMinutes = Math.floor(absMs / (1000 * 60));
             const hours = Math.floor(totalMinutes / 60);
             const minutes = totalMinutes % 60;
 
             if (isLate) {
                 return `<span class="px-2.5 py-1 rounded-xl text-xs font-black bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30 whitespace-nowrap">متأخر ب${hours}س و ${minutes}د 🚨</span>`;
-            } else {
-                return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs whitespace-nowrap">متبقي ${hours}س و ${minutes}د</span>`;
             }
+            return `<span class="text-emerald-700 dark:text-emerald-400 font-black text-xs whitespace-nowrap">متبقي ${hours}س و ${minutes}د</span>`;
         }
 
         function formatDateTime(dateStr) {
@@ -2213,7 +2253,31 @@ function handleGovernorateCheckboxChange(checkbox) {
                 textSpan.innerText = `تم تحديد (${checkedBoxes.length})`;
             }
         }
+function getLastRealAction(ticket) {
+    const isCanceled = (ticket.status === 'ملغي' || ticket.status === 'Canceled');
+    if (isCanceled) {
+        return { name: '-', id: '' };
+    }
 
+    const logs = ticket.history_logs || [];
+    const realActionLogs = [...logs]
+        .filter(l => !(l.action && l.action.includes('إنشاء الطلب')))
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    if (realActionLogs.length > 0) {
+        return {
+            name: realActionLogs[0].author || realActionLogs[0].user_name || '-',
+            id: realActionLogs[0].author_id || realActionLogs[0].user_id || ''
+        };
+    }
+
+    if (ticket.office_last_action_user) {
+        return { name: ticket.office_last_action_user, id: ticket.office_last_action_id || '' };
+    }
+
+    // لم يُتخذ أي أكشن فعلي بعد إرسال الطلب
+    return { name: '-', id: '' };
+}
         // عرض جدول الطلبات الرئيسي بدون عامود رقم البروسس وبالموظف المستقبل الحقيقي (أول موظف أوفيس)
         function renderTicketsTable(tickets) {
             const tbody = document.getElementById('ticketsTableBody');
@@ -2251,21 +2315,10 @@ function handleGovernorateCheckboxChange(checkbox) {
                     receiverId = ticket.office_assignee_id || '';
                 }
 
-                // 2. تحديد الموظف المنجز (آخر موظف قام بأكشن)
-                let lastActionName = '-';
-                let lastActionId = '';
-                const sortedDescLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                if (sortedDescLogs.length > 0) {
-                    lastActionName = sortedDescLogs[0].author || sortedDescLogs[0].user_name || '-';
-                    lastActionId = sortedDescLogs[0].author_id || sortedDescLogs[0].user_id || '';
-                } else if (ticket.office_last_action_user) {
-                    lastActionName = ticket.office_last_action_user;
-                    lastActionId = ticket.office_last_action_id || '';
-                } else if (ticket.office_assignee_name) {
-                    lastActionName = ticket.office_assignee_name;
-                    lastActionId = ticket.office_assignee_id || '';
-                }
-
+                            // 2. تحديد الموظف المنجز (آخر أكشن فعلي، باستثناء الإرسال والطلبات الملغية)
+                const lastAction = getLastRealAction(ticket);
+                let lastActionName = lastAction.name;
+                let lastActionId = lastAction.id;
                 return `
                     <tr class="hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer font-semibold border-b border-slate-200 dark:border-slate-800" onclick="openTicketDetailModal('${ticket.id}')">
                         <td class="p-3 text-right font-bold text-[#3A6B68] dark:text-[#4B8581]">
@@ -2289,7 +2342,7 @@ function handleGovernorateCheckboxChange(checkbox) {
                             ${ticket.governorate || ticket.city || '-'}
                         </td>
                         <td class="p-3 text-right min-w-[160px] w-48">
-                            ${formatSlaDuration(dueDate, isCompleted, ticket.completed_at)}
+                            ${formatSlaDuration(ticket)}
                         </td>
                         <td class="p-3 text-right">
                             <span class="px-2.5 py-1 rounded-xl text-xs font-black ${
@@ -2377,17 +2430,11 @@ function handleGovernorateCheckboxChange(checkbox) {
             receiverName = ticket.office_assignee_name;
         }
         receiverName = receiverName.toLowerCase();
-        // 3. استخراج اسم الموظف المنجز / آخر أكشن (عامود رقم 11) بدقة مثل المعروض بالجدول
-        const sortedDescLogs = [...logs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        let lastActionName = '';
-        if (sortedDescLogs.length > 0) {
-            lastActionName = sortedDescLogs[0].author || sortedDescLogs[0].user_name || '';
-        } else if (ticket.office_last_action_user) {
-            lastActionName = ticket.office_last_action_user;
-        } else if (ticket.office_assignee_name) {
-            lastActionName = ticket.office_assignee_name;
-        }
+              // 3. استخراج اسم الموظف المنجز / آخر أكشن (عامود رقم 11) بنفس منطق الجدول تمامًا
+        let lastActionName = getLastRealAction(ticket).name;
+        if (lastActionName === '-') lastActionName = '';
         lastActionName = lastActionName.toLowerCase();
+
         // 4. تطبيق شروط المطابقة لجميع الخانات
         const matchesNum = !ticketNumQuery || tNum.includes(ticketNumQuery);
         const matchesProcess = !processNumQuery || pNum.includes(processNumQuery);
